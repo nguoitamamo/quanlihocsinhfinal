@@ -1,0 +1,116 @@
+.form-container {
+    max-width: 50%;
+    border-radius: 8px;
+}
+
+.form-row {
+    display: flex;
+    margin-bottom: 15px;
+    flex-direction: column;
+}
+
+
+/*.form-row .form-row-1 label,*/
+/*.form-row label {*/
+/*    width: 100px;*/
+/*}*/
+
+/*.form-row .form-row-1:nth-child(2) label {*/
+/*    margin-left: 10px;*/
+/*}*/
+
+
+.form-row div {
+    display: flex;
+    flex: 1;
+}
+
+.form-row div input {
+    flex: 7;
+}
+
+
+.custom-table input[type="text"] {
+    text-align: center;
+}
+
+input[type="text"],
+.form-row select {
+    flex: 2;
+    padding: 8px;
+    font-size: 14px;
+}
+
+
+
+/*.form-row input[type="text"] + label,*/
+/*.form-row select + label {*/
+/*    margin-left: 20px;*/
+/*}*/
+
+
+.custom-table {
+
+    border-collapse: collapse;
+    width: 100%;
+    text-align: center;
+}
+
+.custom-table th,
+.custom-table td {
+    border: 1px solid #999;
+    padding: 8px;
+}
+
+table tbody tr td {
+    text-align: center;
+
+}
+
+
+.custom-table thead th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.custom-table tr td input[type="text"] {
+    height: 100%;
+    width: 100%;
+    border: none;
+    background: none;
+}
+
+.custom-table button {
+    border: none;
+    width: 30px;
+    background: none;
+}
+
+.btn_custom {
+    background: none;
+    border: none;
+    margin: 0 5px;
+
+}
+
+tr:hover {
+    background-color: #e8d556;
+}
+
+#suggestionLop,
+#suggestionMonHoc {
+    width: 100%;
+    list-style-type: none;
+
+}
+
+#suggestionLop li,
+#suggestionMonHoc li{
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+#suggestionLop li:hover,
+#suggestionMonHoc li:hover{
+    background-color: #f0f0f0;
+}

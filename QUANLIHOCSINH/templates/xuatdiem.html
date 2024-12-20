@@ -1,0 +1,202 @@
+{% extends 'layout/base.html' %}
+
+
+{% block title %} Xuất điểm {% endblock %}
+
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/nhapdiem.css') }}">
+    <style>
+
+        .btn-sua {
+            background-color: #ade6ad;
+            height: 50px;
+            width: 200px;
+            border-radius: 10px;
+        }
+
+        .btn_timkiem {
+            width: 350px;
+            height: 50px;
+            border: 1px solid;
+            border-radius: 10px;
+        }
+
+        th,
+        td {
+            width: 20%;
+        }
+
+
+    </style>
+
+{% endblock %}
+{% block content %}
+
+
+
+    <div class="container mt-3">
+
+        {% if error %}
+            <div class="container col-5 mt-3">
+                <div class="alert alert-danger alert-dismissible">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <strong id="error">{{ error }}</strong>
+                </div>
+            </div>
+        {% endif %}
+        <form action="{{ url_for('xuatdiemlop') }}" method="POST" class="form-container">
+
+            <div class="form-row">
+                <h3>BẢNG ĐIỂM MÔN HỌC</h3>
+                <label for="lopLabel">Tìm kiếm học sinh: </label>
+                <div>
+
+                    <input type="text" id="searchhocsinh" name="searchhocsinh" autocomplete="off"
+                           placeholder="La Trinh, huynhngoctruong@gmail.com, 0369185111...."
+                           value={{ searchhocsinh }}>
+
+                    <select name="keytimkiem" id="">
+
+
+                        <option value="0" {% if keytimkiem == '0' %}selected{% endif %}>Trong lớp</option>
+                        <option value="1" {% if keytimkiem == '1' %}selected{% endif %}>Tất cả lớp trong khối
+                        </option>
+
+
+                    </select>
+
+                </div>
+                <label for="lopLabel">Lớp: </label>
+                <div>
+                    <select name="dslop" id="dslop" onclick="updateMonHocOfLop(this)">
+                        <option value="">Lớp</option>
+
+                        {% for i in dslopcheckbox %}
+                            {% if i.MaLop == malop %}
+                                <option selected value="{{ i.MaLop }}">{{ i.TenLop }}</option>
+
+                            {% else %}
+                                <option value="{{ i.MaLop }}">{{ i.TenLop }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <select name="dskhoi" id="dskhoi" onclick="LoadAlLLopAndMonOfKhoi(this)">
+                        <option value="0">Khối</option>
+                        {% for i in dskhoi %}
+                            {% if i.MaKhoi == makhoi %}
+                                <option selected value="{{ i.MaKhoi }}">{{ i.TenKhoi }}</option>
+                            {% else %}
+                                <option value="{{ i.MaKhoi }}">{{ i.TenKhoi }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <label for="monhocLabel">Môn học: </label>
+
+                <select name="dsmonhoc" id="dsmonhoc">
+                    <option value="">Môn học</option>
+
+                    {% for i in dsmomhoc %}
+                        {% if i.TenMonHoc == tenmonhoc %}
+                            <option selected value="{{ i.MaMonHoc }}">{{ i.TenMonHoc }}</option>
+
+                        {% else %}
+                            <option value="{{ i.MaMonHoc }}">{{ i.TenMonHoc }}</option>
+                        {% endif %}
+                    {% endfor %}
+
+                </select>
+                <label for="monhocLabel">Năm học: </label>
+                <select name="hocki" id="hocki">
+                    <option selected disabled>Chọn học kỳ</option>
+                    {% for HK in danh_sach_hoc_ki %}
+                        {% if HK.NamHoc == namhoc %}
+                            <option selected value="{{ HK.NamHoc }}">{{ HK.NamHoc }}</option>
+                        {% else %}
+                            <option value="{{ HK.NamHoc }}">{{ HK.NamHoc }}</option>
+                        {% endif %}
+
+                    {% endfor %}
+                </select>
+
+            </div>
+
+            <button type="submit" class="btn-save-infor-hocsinh" style="margin-bottom: 15px ">Tìm kiếm</button>
+
+        </form>
+
+
+        <div>
+            <table class="table table-striped custom-table" id="scoreTable"
+                   style="border-collapse: collapse; margin-bottom: 0">
+                <thead>
+                <tr>
+                    {% if malop %}
+                        <th class="customer_width_header">Lớp: {{ malop[1:].split('_')[0] }}</th>
+                    {% endif %}
+                    {% if tenmonhoc %}
+                        <th class="customer_width_header">Môn học: {{ tenmonhoc }}</th>
+                    {% endif %}
+                </tr>
+                </thead>
+            </table>
+            <table class="table table-striped custom-table" id="scoreTable"
+                   style="border-collapse: collapse; margin-bottom: 0">
+                <thead>
+                <tr>
+                    {% if namhoc %}
+                        <th class="customer_width_header">Năm học: {{ namhoc }}</th>
+                    {% endif %}
+                    {% if giaovienhk1 and giaovienhk2 %}
+                        {% if giaovienhk1.UserID == giaovienhk2.UserID %}
+                            <th class="customer_width_header">Giáo viên: {{ giaovienhk1.Ho }} {{ giaovienhk1.Ten }}</th>
+
+                        {% else %}
+                            <th class="customer_width_header">Giáo viên: {{ giaovienhk1.Ho }} {{ giaovienhk1.Ten }}
+                                - {{ giaovienhk2.Ho }} {{ giaovienhk2.Ten }}</th>
+                        {% endif %}
+                    {% endif %}
+
+                </tr>
+                </thead>
+            </table>
+            <table class="table table-striped custom-table" style="margin-bottom: 0; border-collapse: collapse;">
+                <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Họ tên</th>
+                    <th>Điểm TB HK1</th>
+                    <th>Điểm TB HK2</th>
+                    {% if keytimkiem %}
+                        <th>Lớp</th>
+                    {% endif %}
+                </tr>
+                </thead>
+            </table>
+
+            <div style="height: 450px; overflow-y: auto; margin-bottom: 50px">
+                <table id="scoreTable" class="table table-striped custom-table"
+                       style="border-collapse: collapse;">
+                    <tbody>
+                    {% for i in dshocsinh %}
+
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ i['HoTen'] }}</td>
+
+                            <td>{{ i['TBHK1'] }}</td>
+                            <td>{{ i['TBHK2'] }}</td>
+                            {% if keytimkiem %}
+                                <td>{{ i['MaLop'][1:].split('_')[0] }}</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src={{ url_for('static', filename = 'js/nhapdiem.js') }}></script>
+
+{% endblock %}

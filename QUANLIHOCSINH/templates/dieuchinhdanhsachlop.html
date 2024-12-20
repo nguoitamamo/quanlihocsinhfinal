@@ -1,0 +1,419 @@
+{% extends 'layout/base.html' %}
+
+{% block css %}
+
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/nhapdiem.css') }}">
+    <style>
+
+
+        .container-dshoc-notlop {
+            height: 350px;
+            width: 70%;
+            border: 1px solid;
+            border-radius: 10px;
+            margin: 20px auto;
+        }
+
+        .btn-sua {
+            background-color: #ade6ad;
+            height: 50px;
+            width: 200px;
+            border-radius: 10px;
+        }
+
+        select + i {
+            margin: 20px;
+        }
+
+        .btn_timkiem {
+            width: 350px;
+            height: 50px;
+            border: 1px solid;
+            border-radius: 10px;
+        }
+
+
+        .stt,
+        .hoten,
+        .gioitinh,
+        .diachi,
+        .namsinh,
+        .checkbox,
+        .diem,
+        .xoa {
+            width: 16%;
+        }
+
+        .highlight-row {
+            background-color: #ade6ad;
+        }
+    </style>
+
+
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="container col-5 mt-3">
+        <div class="alert alert-danger alert-dismissible" style="display: none">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <strong id="error"></strong>
+        </div>
+    </div>
+
+    {% if dshocsinhnotlop %}
+        <div class="container">
+
+            <div class="container-dshoc-notlop">
+                <h3 style="margin-top: 20px; text-align: center">DANH SÁCH HỌC SINH CHƯA CÓ LỚP</h3>
+                <div>
+                    <table class="table table-striped custom-table" style="margin-bottom: 0">
+                        <thead>
+                        <tr>
+                            <th class="stt">STT</th>
+                            <th class="hoten">Họ tên</th>
+                            <th class="diem">Điểm</th>
+                            <th class="gioitinh">Giới tính</th>
+                            <th class="namsinh">Năm sinh</th>
+                            <th class="diachi">Địa chỉ</th>
+                            <th class="checkbox"></th>
+                        </tr>
+                        </thead>
+                    </table>
+                    <div style="height: 150px; overflow-y: auto; margin-bottom: 20px">
+                        <table class="table table-striped custom-table">
+                            <tbody>
+                            {% for hs in dshocsinhnotlop %}
+                                <tr>
+                                    <td class="stt">{{ loop.index }}</td>
+                                    {% for info in hs %}
+
+                                        <td class="hoten">{{ info.Ho }} {{ info.Ten }}</td>
+                                        <td class="diem">{{ info.DiemTbDauVao }}</td>
+                                        <td class="gioitinh">{{ info.GioiTinh }}</td>
+                                        <td class="namsinh">{{ info.NgaySinh.strftime('%Y') }}</td>
+                                        <td class="diachi">{{ info.DiaChi }}</td>
+                                        <td class="checkbox">
+
+
+                                            <input type="checkbox" class="form-check-input"
+                                                   onchange="CheckAddHocSinh('{{ info.UserID }}' , this)">
+
+                                        </td>
+
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <button class="btn btn-sua" data-bs-toggle="modal"
+                            data-bs-target="#modal-sapxeploptudau">Sắp xếp lớp từ đầu
+                    </button>
+                    <button class="btn btn-sua" data-bs-toggle="modal"
+                            data-bs-target="#modal-createlop">Tạo lớp
+                    </button>
+                    <button class="btn btn-sua" onclick="AddHocSinhToLop('{{ lop }}')">Thêm</button>
+
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="modal" id="modal-sapxeploptudau">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <img src="{{ url_for('static', filename='images/logo.jpg') }}"
+                         alt="logo THPT NguyenDieu">
+                    <h3>Bạn có chắc chắn muốn sắp xếp từ đầu?</h3>
+                </div>
+                <div class="modal-body" style="text-align: center;">
+
+                    <p>
+                        <strong>Chú ý:</strong>
+                        Chỉ sắp xếp lại tất cả các lớp của học sinh mới!
+                    </p>
+                    <button class="btn btn-sua" onclick="DevisionClassBegin0()">Có</button>
+                    <button class="btn btn-sua" data-bs-dismiss="modal">Không</button>
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="container mt-3" style="display: flex; justify-content: space-between">
+        <form action="{{ url_for('timkkiemhocsinhalllop') }}" method="post">
+            <ul class="pagination" id="page-item-solop">
+
+                <li class="page-item" style="margin-left: 5px;"><a class="page-link" href="#">Khối</a></li>
+                <select name="dskhoi" id="dskhoi">
+                    <option value="0">Mới</option>
+                    {% for i in dskhoi %}
+                        {% if i.MaKhoi == makhoi %}
+                            <option selected value="{{ i.MaKhoi }}">{{ i.TenKhoi }}</option>
+                        {% else %}
+                            <option value="{{ i.MaKhoi }}">{{ i.TenKhoi }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                <li class="page-item" style="margin-left: 5px;"><a class="page-link" href="#">Lớp</a></li>
+
+                {% for i in range(1, solop + 1) %}
+                    <li class="page-item"><a class="page-link" id="page-link-{{ i }}"
+                                             href="
+                                                {{ url_for('dieuchinhdanhsachlop',
+                                                page=i,
+                                                makhoi = makhoi,
+                                                tenkhoi = tenkhoi) }}">{{ i }}</a>
+                    </li>
+                {% endfor %}
+
+            </ul>
+
+
+            <input type="text" class="btn_timkiem" name="textinput"
+                   value="{{ textinput }}"
+                   placeholder="Huỳnh A, huynhngoctruong@gmail.com, sdt, ...">
+            <button class="btn btn-sua" type="submit">
+                Tìm kiếm
+            </button>
+        </form>
+    </div>
+
+
+
+    <div class="container mt-3">
+        {% if key %}
+        {% else %}
+            <h2>Lớp: {{ lop }}</h2>
+            <p>Sĩ số: {{ lophocsinh | length }}</p>
+        {% endif %}
+        <div>
+            <table class="table table-striped custom-table" style="margin-bottom: 0; border-collapse: collapse;">
+                <thead>
+                <tr>
+                    <th class="stt">STT</th>
+                    <th class="hoten">Họ tên</th>
+                    <th class="diem">Điểm</th>
+                    <th class="gioitinh">Giới tính</th>
+                    <th class="namsinh">Năm sinh</th>
+                    <th class="diachi">
+                        {% if key %}
+                            Lớp
+                        {% else %}
+                            Địa chỉ
+                        {% endif %}
+                    </th>
+                    <th class="xoa">Xóa</th>
+                </tr>
+                </thead>
+            </table>
+
+            <div style="height: 450px; overflow-y: auto; margin-bottom: 50px">
+                <table id="scoreTable" class="table table-striped custom-table"
+                       style="border-collapse: collapse;">
+                    <tbody>
+                    {% for hocsinh in lophocsinh %}
+                        <tr>
+                            <td class="stt">{{ loop.index }}</td>
+                            {% for info in hocsinh %}
+
+                                <td class="hoten">{{ info.Ho }} {{ info.Ten }}</td>
+                                <td class="diem">{{ info.DiemTbDauVao }}</td>
+                                <td class="gioitinh">{{ info.GioiTinh }}</td>
+                                <td class="namsinh">{{ info.NgaySinh.strftime('%Y') }}</td>
+                                {% if key %}
+                                    <td class="diachi">{{ info.MaLop[1:].split('_')[0] }}</td>
+                                {% else %}
+                                    <td class="diachi">{{ info.DiaChi }}</td>
+                                {% endif %}
+
+                                <td class="xoa">
+                                    {% if key %}
+                                        <button style="background: none; border: none"
+                                                onclick="RemoveHS('{{ info.UserID }}', '{{ info.MaLop[1:].split('_')[0] }}')">
+                                            <i class="fa-solid fa-minus"></i>
+                                        </button>
+                                    {% else %}
+                                        <button style="background: none; border: none"
+                                                onclick="RemoveHS('{{ info.UserID }}', '{{ lop }}')">
+                                            <i class="fa-solid fa-minus"></i>
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+    </div>
+    <div class="modal" id="modal-createlop">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 60%;">
+            <div class="container modal-content">
+                <div class="modal-header">
+                    <img src="{{ url_for('static', filename='images/logo.jpg') }}"
+                         alt="logo THPT NguyenDieu">
+                    <h3>THÔNG TIN LỚP</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" style="margin: 0"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <div class="form-row">
+                            <label for="tenlop">Tên Lớp:</label>
+                            <input type="text" id="tenlop"
+                                   value="{{ tenkhoi }}A{{ solop + 1 }}">
+
+                            <label for="textcondition">Lọc:</label>
+                            <select name="" id="selectcondition">
+                                <option value="1"> ></option>
+                                <option value="2"> <</option>
+                                <option value="3"> >=</option>
+                                <option value="4"> <=</option>
+                            </select>
+
+                            <input type="text" id="textcondition" placeholder="điểm..">
+                            <div class="mt-3 " style="text-align: right">
+                                <button class="btn btn-sua" onclick="FindOfCondition()">
+                                    Lọc
+                                </button>
+                            </div>
+                        </div>
+                        {% if dshocsinhnotlop %}
+                            <div class="container">
+
+                                <div class="container-dshoc-notlop createlop" style="border: none; width: 100%">
+                                    <h3 style="margin-top: 20px; text-align: center">DANH SÁCH HỌC SINH CHƯA CÓ
+                                        LỚP</h3>
+                                    <div>
+                                        <table class="table table-striped custom-table" style="margin-bottom: 0">
+                                            <thead>
+                                            <tr>
+                                                <th class="stt">STT</th>
+                                                <th class="hoten">Họ tên</th>
+                                                <th class="diem">Điểm</th>
+                                                <th class="gioitinh">Giới tính</th>
+                                                <th class="namsinh">Năm sinh</th>
+                                                <th class="diachi">Địa chỉ</th>
+                                                <th class="checkbox">
+                                                </th>
+                                            </tr>
+                                            </thead>
+                                        </table>
+                                        <div style="height: 190px; overflow-y: auto; margin-bottom: 20px">
+                                            <table class="table table-striped custom-table">
+                                                <tbody>
+                                                {% for hs in dshocsinhnotlop %}
+                                                    <tr>
+                                                        <td class="stt">{{ loop.index }}</td>
+                                                        {% for info in hs %}
+
+                                                            <td class="hoten">{{ info.Ho }} {{ info.Ten }}</td>
+                                                            <td class="diem">{{ info.DiemTbDauVao }}</td>
+                                                            <td class="gioitinh">{{ info.GioiTinh }}</td>
+                                                            <td class="namsinh">{{ info.NgaySinh.strftime('%Y') }}</td>
+                                                            <td class="diachi">{{ info.DiaChi }}</td>
+                                                            <td class="checkbox">
+                                                                <input type="checkbox" class="form-check-input-creatlop"
+                                                                       id="{{ info.UserID }}"
+                                                                       onchange="CheckAddHocSinh('{{ info.UserID }}' , this)">
+
+                                                            </td>
+
+                                                        {% endfor %}
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div style="display: flex; justify-content: space-between">
+                                        <p style="flex: 1">
+                                            <strong>*Mặc định:</strong>
+                                            Nếu không chọn học sinh trước khi tạo lớp, lớp được tạo sẽ bao gồm tất cả
+                                            học sinh chưa có lớp!
+                                        </p>
+
+                                        <button class="btn btn-sua" onclick="CreateLopWithDsHocSinh()">Tạo lớp
+                                        </button>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/saveinfordshocsinh.js') }}"></script>
+    <script>
+        const dskhoi = document.getElementById('dskhoi');
+
+        dskhoi.addEventListener('change', () => {
+
+
+            const khoi = dskhoi.options[dskhoi.selectedIndex];
+            const pageitem = document.getElementById('page-item-solop');
+
+
+            fetch(`/user/dieuchinhdanhsachlop/loadsolop/${khoi.value}`, {
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.solop) {
+
+                        const solop = {{ solop }}
+
+                        for (let i = 1; i <= solop; i++) {
+                            const element = document.getElementById(`page-link-${i}`);
+                            if (element) {
+                                element.remove();
+                            }
+                        }
+
+                        for (let i = 1; i <= data.solop; i++) {
+                            const li = document.createElement('li');
+                            li.className = 'page-item';
+                            const a = document.createElement('a');
+                            a.className = 'page-link';
+                            a.id = `page-link-${i}`;
+
+                            a.href = `/user/dieuchinhdanhsachlop?page=${i}&makhoi=${khoi.value}&tenkhoi=${khoi.textContent}`;
+
+                            a.textContent = i;
+
+                            li.appendChild(a)
+
+                            pageitem.appendChild(li);
+
+                        }
+
+                    }
+
+                })
+
+        })
+
+    </script>
+{% endblock %}
