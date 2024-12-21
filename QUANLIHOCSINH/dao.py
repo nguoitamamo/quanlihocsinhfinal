@@ -40,7 +40,7 @@ def load_hoc_ki():
 def Check_login(username, password, role = None):
     if username and password:
         passw = str(hashlib.md5(password.strip().encode('utf-8')).hexdigest())
-        return models.Account.query.filter(
+        return db.session.query(models.Account).filter(
             models.Account.TenDangNhap.__eq__(username.strip()),
             models.Account.MatKhau.__eq__(passw.strip()),
             models.Account.Active.__eq__(True)
@@ -351,11 +351,6 @@ def UpdateSiSo(MaLop, SiSo):
         db.session.commit()
 
 
-def CheckInfoLopHocBeforeLoadDiem(malop, mamonhoc, mahocki):
-
-    return models.Hoc.query.filter(models.Hoc.MaLop == malop,
-                                   models.Hoc.MaHocKi == mahocki,
-                                   models.Hoc.MaMonHoc == mamonhoc).first()
 
 
 
@@ -413,6 +408,7 @@ def CreateLop(tenlop, listhocsinh):
     db.session.commit()
 
 
+
 def Division_Class(solopcanchia, solopthem=None):
     bd = Cnt_Sum_HocSinh_Not_Lop()
 
@@ -453,6 +449,7 @@ def Division_Class(solopcanchia, solopthem=None):
             db.session.add(lophocsinh)
 
         db.session.commit()
+
 
 
 def GetPerMissionByValue(value):
@@ -526,7 +523,7 @@ def GetIDByHoTenEmail(inputsearch, malop):
     ).all())
 
 
-def  GetHocSinhByTenHoTenEmailPhone(inputsearch, malop=None, namtaolop=None):
+def  GetHocSinhByTenHoTenEmailPhone(inputsearch, malop=None, namtaolop=None, tenkhoi = None):
     res = []
 
     inputsearch = inputsearch.replace(" ", "")
@@ -547,7 +544,7 @@ def  GetHocSinhByTenHoTenEmailPhone(inputsearch, malop=None, namtaolop=None):
                         "HoTen": user.Ho + ' ' + user.Ten})
 
     else:
-        dsmalop = GetMaLop(namtaolop)
+        dsmalop = GetMaLop(namtaolop= namtaolop , tenkhoi = tenkhoi)
 
         # ds = GetIDByHoTenEmail("test103@gmail.com", "L10A1_2024")
         for i in dsmalop:
@@ -848,11 +845,11 @@ def RemoveDshocsinhAllOfCurrentyear():
 
 
 
-def GetMaLop(namtaolop):
+def GetMaLop(tenkhoi, namtaolop):
     dslop = db.session.query(
         models.LopHocSinh.MaLop
     ).filter(
-        models.LopHocSinh.NamTaoLop == namtaolop
+        models.LopHocSinh.MaLop.ilike(f"%{tenkhoi}A%{namtaolop}")
     ).distinct().all()
 
     return dslop
@@ -885,12 +882,74 @@ def LoadAllMon():
 
 
 
+
+
+def themlop(malop, malop1 ,  tenlop, namtaolop):
+
+    hocsinhs = db.session.query(models.LopHocSinh.MaHocSinh).filter(models.LopHocSinh.MaLop == malop).all()
+
+    lop = models.Lop(MaLop=malop1 , TenLop=tenlop, SiSo=len(hocsinhs), MaKhoi="1")
+    db.session.add(lop)
+    db.session.commit()
+    for mahocsinh in hocsinhs:
+        lophocsinh = models.LopHocSinh(MaLop=malop1 , MaHocSinh=mahocsinh[0], NamTaoLop= namtaolop)
+        db.session.add(lophocsinh)
+
+    db.session.commit()
+
+
+def LoadLopEdHocInHocKiByMaHocKi(mahocki, tenkhoi = None):
+    dskhoi = []
+    if tenkhoi:
+        malops = db.session.query(models.Hoc.MaLop).filter(models.Hoc.MaHocKi == mahocki,
+                                                           models.Hoc.MaLop.ilike(f"%L{tenkhoi}A%")).distinct().all()
+        dskhoi.append(tenkhoi)
+    else:
+        malops = db.session.query(models.Hoc.MaLop).filter(models.Hoc.MaHocKi == mahocki).distinct().all()
+        [dskhoi.append(malop[0][1:].split('A')[0]) for malop in malops if malop[0][1:].split('A')[0] not in dskhoi]
+
+
+    return { "malops": malops,
+             "dskhoi": dskhoi}
+
+
+
+
+
+mamonhoc = ['MH1' , 'MH2' , 'MH3' , 'MH4' , 'MH5' ]
+magiangvien = ['HS424_74', 'HS427_29', 'HS1761_32', 'HS1760_55', 'HS428_59']
+
+def lophoc(namtaolop , namhoc_hocki1, tenkhoi, namhoc_hocki2 = None):
+
+
+    listmalop = [ malop[0] for malop in GetMaLop(namtaolop = namtaolop , tenkhoi = tenkhoi) ]
+
+
+
+    for malop in listmalop:
+        for i in range(len(mamonhoc)):
+            hocki1 = models.Hoc( MaLop = malop , MaMonHoc = mamonhoc[i] , MaGiangVien = magiangvien[i], MaHocKi= '1_' + namhoc_hocki1  )
+            db.session.add(hocki1)
+            if namhoc_hocki2:
+                hocki2 = models.Hoc( MaLop = malop , MaMonHoc = mamonhoc[i] , MaGiangVien = magiangvien[i], MaHocKi= '2_' + namhoc_hocki2  )
+
+                db.session.add(hocki2)
+
+
+
+    db.session.commit()
+
+
+
+
+
+
 Ho = ["Phan", "Ly", "Thanh", "La", "Hoang"]
 Ten = ["Trung", "Trinh", "A", "D", "E", "G", "B"]
 
 
 def them():
-    for i in range(3000, 3031):
+    for i in range(1, 451):
         idac = "HS" + str(Get_Cnt_Accout_Current()) + "_" + str(random.randint(10, 99))
         hocsinh = models.HocSinh(MaHocSinh=idac, DiemTbDauVao=float(random.randint(1, 10)))
         db.session.add(hocsinh)
@@ -917,6 +976,26 @@ def them():
 #     db.session.commit()
 
 
+def them1():
+
+    idac = "Admin123"
+    password_hash = str(hashlib.md5("123".encode('utf-8')).hexdigest())
+
+
+    user = models.Account(id= idac,
+                          TenDangNhap= "Admin",
+                          MatKhau=password_hash,
+                          Active = True,
+                          role = models.Role.Admin)
+
+    db.session.add(user)
+
+    inforHocSinh = models.UserInfor(UserID=idac, Ho="Phan", Ten="Thanh Trinh", NgaySinh="2004-12-11",
+                                    GioiTinh="Nam", DiaChi="Bình định", Email="2251052129trinh@ou.edu.vn",
+                                    Image=None)
+    db.session.add(inforHocSinh)
+
+    db.session.commit()
 
 
 if __name__ == '__main__':
@@ -924,11 +1003,16 @@ if __name__ == '__main__':
         # lop_hocsinh = LoadLop(malop = 'L10A1_2023',key = "diem",  mamonhoc='MH1', mahocki=1)
         #
         #
-        # print(lop_hocsinh)
+        # print(lop_hocsinh9
         #
         # for i in lop_hocsinh['diemdshocsinh']:
-        #     if sum(i['15phut']) != 0:
+        #     if sum(i['15phut']) != 010
         #         print(f"trung binh: { sum(i['15phut']) / len(i['15phut']) }")x`
         # print(GetLopByMa(mahocsinh="HS587_52", namtaolop="2023"))
         # print(GetHocSinhByTenHoTenEmailPhone(inputsearch= "Trinh", namtaolop="2023") )
-        print(GetMonHoc(mamonhoc='MH1').TenMonHoc)
+        # print(Cnt_Sum_HocSinh_Not_Lop())
+        # sum_hoc_sinh_not_lop = Cnt_Sum_HocSinh_Not_Lop()
+        # solop = ceil(sum_hoc_sinh_not_lop / app.config["MAX_SS_LOP"])
+        # # print(solop)
+        # Division_Class(solopcanchia= solop)
+       print(LoadLopEdHocInHocKiByMaHocKi(mahocki = '1_2023-2024', tenkhoi = '10'))

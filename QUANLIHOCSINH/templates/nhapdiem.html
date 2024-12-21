@@ -43,7 +43,7 @@
 
         {% if error %}
             <div class="container col-5 mt-3">
-                <div class="alert alert-danger alert-dismissible" >
+                <div class="alert alert-danger alert-dismissible">
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     <strong id="error">{{ error }}</strong>
                 </div>
@@ -88,31 +88,45 @@
                     </select>
 
                 </div>
-                <label for="lopLabel">Lớp: </label>
-                <div>
-                    <select name="dslop" id="dslop" onclick="updateMonHocOfLop(this)">
-                        <option value="">Lớp</option>
 
-                        {% for i in dslopcheckbox %}
-                            {% if i.MaLop == malop %}
-                                <option selected value="{{ i.MaLop }}">{{ i.TenLop }}</option>
+                 <label for="monhocLabel">Học kì: </label>
+                <select name="hocki" id="hocki" onclick = "LoadALlLopEdHocInHocKiEd(this , 'nhap')">
+                    <option selected disabled value = '0'>Chọn học kỳ</option>
+                    {% for HK in danh_sach_hoc_ki %}
+                        {% if HK.MaHocKi == mahocki %}
+                            <option selected value="{{ HK.MaHocKi }}">Học kỳ {{ HK.TenHocKi }}
+                                - {{ HK.NamHoc }}</option>
+                        {% else %}
+                            <option value="{{ HK.MaHocKi }}">Học kỳ {{ HK.TenHocKi }} - {{ HK.NamHoc }}</option>
+                        {% endif %}
 
-                            {% else %}
-                                <option value="{{ i.MaLop }}">{{ i.TenLop }}</option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
-                    <select name="dskhoi" id="dskhoi" onclick="LoadAlLLopAndMonOfKhoi(this)">
-                        <option value="0">Khối</option>
-                        {% for i in dskhoi %}
-                            {% if i.MaKhoi == makhoi %}
-                                <option selected value="{{ i.MaKhoi }}">{{ i.TenKhoi }}</option>
-                            {% else %}
-                                <option value="{{ i.MaKhoi }}">{{ i.TenKhoi }}</option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
-                </div>
+                    {% endfor %}
+                </select>
+                 <label for="dskhoi">Khối: </label>
+                <select name="dskhoi" id="dskhoi" onclick="LoadAlLLopOfKhoi(this)">
+                    <option value="0">Khối</option>
+                    {% for i in dskhoi %}
+                        {% if i.MaKhoi == makhoi %}
+                            <option selected value="{{ i.MaKhoi }}">{{ i.TenKhoi }}</option>
+                        {% else %}
+                            <option value="{{ i.MaKhoi }}">{{ i.TenKhoi }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+             <label for="lopLabel">Lớp: </label>
+                <select name="dslop" id="dslop" onclick="updateMonHocOfLop(this)">
+                    <option value="">Lớp</option>
+
+                    {% for i in dslopcheckbox %}
+                        {% if i.MaLop == malop %}
+                            <option selected value="{{ i.MaLop }}">{{ i.MaLop[1:].split('_')[0] }}</option>
+
+                        {% else %}
+                            <option value="{{ i.MaLop }}">{{ i.MaLop[1:].split('_')[0] }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+
                 <label for="monhocLabel">Môn học: </label>
 
                 <select name="dsmonhoc" id="dsmonhoc">
@@ -128,19 +142,8 @@
                     {% endfor %}
 
                 </select>
-                <label for="monhocLabel">Học kì: </label>
-                <select name="hocki" id="hocki">
-                    <option selected disabled>Chọn học kỳ</option>
-                    {% for HK in danh_sach_hoc_ki %}
-                        {% if HK.MaHocKi == mahocki %}
-                            <option selected value="{{ HK.MaHocKi }}">Học kỳ {{ HK.TenHocKi }}
-                                - {{ HK.NamHoc }}</option>
-                        {% else %}
-                            <option value="{{ HK.MaHocKi }}">Học kỳ {{ HK.TenHocKi }} - {{ HK.NamHoc }}</option>
-                        {% endif %}
 
-                    {% endfor %}
-                </select>
+
 
             </div>
 

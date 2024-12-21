@@ -66,13 +66,13 @@ function SaveInforDshocsinh() {
 }
 
 
-function RemoveHS(MaHocSinh, TenLop) {
+function RemoveHS(MaHocSinh, malop) {
 
     const dskhoi = document.getElementById('dskhoi');
 
     const makhoi = dskhoi.options[dskhoi.selectedIndex].value;
 
-    fetch(`/user/dieuchinhdanhsachlop/removehocsinh/${TenLop}/${MaHocSinh}/${makhoi}`, {
+    fetch(`/user/dieuchinhdanhsachlop/removehocsinh/${malop}/${MaHocSinh}/${makhoi}`, {
         method: 'post',
         headers: {
             'Content-Type': 'application/json',
@@ -116,12 +116,12 @@ function CheckAddHocSinh(hocsinhid, obj) {
 }
 
 
-function AddHocSinhToLop(tenlop) {
+function AddHocSinhToLop(malop) {
 
     const dskhoi = document.getElementById('dskhoi');
     const makhoi = dskhoi.options[dskhoi.selectedIndex].value;
 
-    fetch(`/user/dieuchinhdanhsachlop/addhocsinh/ds/${tenlop}/${makhoi}`, {
+    fetch(`/user/dieuchinhdanhsachlop/addhocsinh/ds/${malop}/${makhoi}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

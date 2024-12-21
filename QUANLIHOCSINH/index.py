@@ -153,7 +153,7 @@ def capnhatthongtin():
 
 @app.route('/user/lapdanhsachlop')
 def lapdanhsachlop():
-    solop = len(dao.GetMaLop(dao.CurrentYear()))
+    solop = len(dao.GetMaLop( namtaolop=dao.CurrentYear(), tenkhoi = '10'))
 
     sum_hoc_sinh_not_lop = dao.Cnt_Sum_HocSinh_Not_Lop()  # tổng học sinh not lớp
     sum_siso_all_lop_current = dao.CntSiSoLopCurrent(solop=solop, key='L10A')  # tổng học sinh của tất các các lớp
@@ -210,8 +210,6 @@ def loadmoninlop(malop):
         monhocs = dao.LoadMonHocOfLop(malop)
 
         monhocs = [{"TenMonHoc": monhoc.TenMonHoc, "MaMonHoc": monhoc.MaMonHoc} for monhoc in monhocs]
-
-        print(monhocs)
 
         return jsonify({
             "success": True,
@@ -379,21 +377,25 @@ def dieuchinhdanhsachlop():
         session.get('dshocsinhnotlop').clear()
         session.modified = True
 
+
     page = str(request.args.get('page', 1))
-    makhoi = int(request.args.get('makhoi', "0"))
-    tenkhoi = request.args.get('tenkhoi', "10")
+    makhoi = int(request.args.get('makhoi', 0))
 
-    namtaolop = str((int(dao.CurrentYear()) - makhoi))
-    malop = 'L' + tenkhoi + 'A' + page + '_' + namtaolop
+    tenkhoi = str(request.args.get('tenkhoi', "Mới"))
+
+    namtaolop = str((int(dao.CurrentYear()) - 1))
+
     lop = tenkhoi + 'A' + page
+    malop = 'L' + lop + '_' + namtaolop
 
-    if tenkhoi == "Mới":
+
+    if makhoi == 0:
         namtaolop = dao.CurrentYear()
         malop = 'L10A' + page + '_' + namtaolop
         lop = '10A' + page
         tenkhoi = "10"
 
-    solop = len(dao.GetMaLop(namtaolop=namtaolop))
+    solop = len(dao.GetMaLop(namtaolop=namtaolop ,tenkhoi= tenkhoi))
 
     lophocsinh = dao.LoadLop(malop=malop, key="info")
 
@@ -403,15 +405,16 @@ def dieuchinhdanhsachlop():
                            solop=solop,
                            dshocsinhnotlop=dshocsinhnotlop,
                            dskhoi=dao.LoadKhoi(),
-                           makhoi=makhoi,
                            tenkhoi=tenkhoi,
-                           lop=lop)
+                           makhoi = makhoi,
+                           malop = malop)
 
 
 @app.route('/user/dieuchinhdanhsachlop/addhocsinh/<hocsinhid>', methods=["POST"])
 def savehocsinhtosession(hocsinhid):
     if "dshocsinhnotlop" not in session:
         session['dshocsinhnotlop'] = []
+
 
     if hocsinhid not in session.get('dshocsinhnotlop'):
         session['dshocsinhnotlop'].append(hocsinhid)
@@ -421,14 +424,14 @@ def savehocsinhtosession(hocsinhid):
         return jsonify({"success": True})
 
 
-@app.route('/user/dieuchinhdanhsachlop/addhocsinh/ds/<tenlop>/<makhoi>', methods=["POST"])
-def addhocsinhtolop(tenlop, makhoi):
+@app.route('/user/dieuchinhdanhsachlop/addhocsinh/ds/<malop>/<makhoi>', methods=["POST"])
+def addhocsinhtolop(malop, makhoi):
     try:
 
-        namtaolop = str(int(dao.CurrentYear()) - int(makhoi))
+        namtaolop = str(int(dao.CurrentYear()) - 1)
 
         bool = dao.addHocSinhToLop(listmahocsinh=session.get("dshocsinhnotlop"),
-                                   malop='L' + str(tenlop) + '_' + namtaolop,
+                                   malop=malop,
                                    namtaolop=namtaolop)
         if not bool:
             return jsonify({"success": False, "error": "Lớp đã đầy!"})
@@ -719,13 +722,17 @@ def saveinforDshocsinh():
                         "state": "Email hoặc số điện thoại bị trùng!"})
 
 
-@app.route('/user/dieuchinhdanhsachlop/removehocsinh/<tenlop>/<mahocsinh>/<makhoi>', methods=['post'])
-def removehs(tenlop, mahocsinh, makhoi):
+@app.route('/user/dieuchinhdanhsachlop/removehocsinh/<malop>/<mahocsinh>/<makhoi>', methods=['post'])
+def removehs(malop, mahocsinh, makhoi):
     try:
+        if makhoi == '0':
+            namtaolop = dao.CurrentYear()
+        else:
+            namtaolop = str( int(dao.CurrentYear()) - 1)
 
-        namtaolop = str(int(dao.CurrentYear()) - int(makhoi))
-        malop = 'L' + tenlop + '_' + namtaolop
 
+
+        print(f"mã lớp: {malop} ")
         res = dao.removeHocSinh(malop, mahocsinh)
 
         return jsonify({"success": res})
@@ -740,28 +747,18 @@ def nhapdiemlop():
 
         data = request.form.copy()
 
-        print(data)
-
         malop = data['dslop'] if 'dslop' in data else ''
 
         makhoi = int(data['dskhoi'])
-        dslop = dao.LoadLopEdHoc()
+        tenkhoi = dao.LoadKhoi(data['dskhoi'])
 
-        if dao.CheckInfoLopHocBeforeLoadDiem(malop=malop, mamonhoc=data['dsmonhoc'], mahocki=data['hocki']) is None:
-            return render_template('nhapdiem.html',
-                                   dslopcheckbox=dslop, malop=malop,
-                                   dsmomhoc=dao.LoadMonHocOfLop(malop),
-                                   tenmonhoc=dao.GetMonHoc(mamonhoc=data['dsmonhoc']).TenMonHoc,
-                                   dskhoi=dao.LoadKhoi(), makhoi=makhoi,
-                                   danh_sach_hoc_ki=dao.load_hoc_ki(), mahocki=data['hocki'],
-                                   error="Lớp, môn học và học kì của bạn chọn không tồn tại!")
+        info = dao.LoadLopEdHocInHocKiByMaHocKi(mahocki = data['hocki'])
 
-
+        dskhoi = [ khoi for khoi in dao.LoadKhoi() if khoi.TenKhoi in info['dskhoi']]
 
         del data['dskhoi']
 
-        namtaolop = str(int(dao.CurrentYear()) - makhoi)
-
+        namtaolop = data['hocki'].split('_')[-1].split('-')[0]
 
 
         dshocsinh = []
@@ -787,7 +784,9 @@ def nhapdiemlop():
 
             else:
 
-                hocsinhs = dao.GetHocSinhByTenHoTenEmailPhone(inputsearch=data['searchhocsinh'], namtaolop=namtaolop)
+                hocsinhs = dao.GetHocSinhByTenHoTenEmailPhone(inputsearch=data['searchhocsinh'], namtaolop=namtaolop, tenkhoi = tenkhoi )
+
+
 
                 for hs in hocsinhs:
                     hs_diem = {
@@ -801,12 +800,13 @@ def nhapdiemlop():
                     max15phut = max(max15phut, len(hs_diem['15phut']))
                     max1tiet = max(max1tiet, len(hs_diem['1tiet']))
 
+
                 return render_template('nhapdiem.html', dshocsinh=dshocsinh,
                                        searchhocsinh=data['searchhocsinh'],
-                                       dslopcheckbox=dslop, keytimkiem=data['keytimkiem'],
+                                       dslopcheckbox=info['malops'], keytimkiem=data['keytimkiem'],
                                        dsmomhoc=dao.LoadAllMon(),
                                        tenmonhoc=dao.GetMonHoc(mamonhoc=data['dsmonhoc']).TenMonHoc,
-                                       dskhoi=dao.LoadKhoi(), makhoi=makhoi,
+                                       dskhoi=dskhoi, makhoi=makhoi,
                                        danh_sach_hoc_ki=dao.load_hoc_ki(), mahocki=data['hocki']
                                        )
 
@@ -830,10 +830,10 @@ def nhapdiemlop():
 
         return render_template('nhapdiem.html', dshocsinh=dshocsinh,
                                searchhocsinh=data['searchhocsinh'],
-                               dslopcheckbox=dslop, malop=malop,
+                               dslopcheckbox=info['malops'], malop=malop,
                                dsmomhoc=dao.LoadMonHocOfLop(malop),
                                tenmonhoc=dao.GetMonHoc(mamonhoc=data['dsmonhoc']).TenMonHoc,
-                               dskhoi=dao.LoadKhoi(), makhoi=makhoi,
+                               dskhoi=dskhoi, makhoi=makhoi,
                                danh_sach_hoc_ki=dao.load_hoc_ki(), mahocki=data['hocki'],
                                giaovien=dao.GetGiaoVienTeach(malop=malop, mamonhoc=data['dsmonhoc'],
                                                              mahocki=data['hocki'])
@@ -998,20 +998,25 @@ def timkkiemhocsinhalllop():
 
         makhoi = int(request.form.getlist('dskhoi')[0])
 
+        print(makhoi)
+
         tenkhoi = dao.LoadKhoi(makhoi=makhoi)
 
         if makhoi == 0:
             tenkhoi = "10"
+            namtaolop = dao.CurrentYear()
+        else:
+            namtaolop = str(int(dao.CurrentYear()) - 1)
 
         textinput = request.form.get('textinput')
 
-        namtaolop = str(int(dao.CurrentYear()) - makhoi)
 
-        hocsinhs = dao.GetHocSinhByTenHoTenEmailPhone(inputsearch=textinput, namtaolop=namtaolop)
+
+        hocsinhs = dao.GetHocSinhByTenHoTenEmailPhone(inputsearch=textinput, namtaolop=namtaolop ,tenkhoi= tenkhoi)
 
         dshocsinh = [dao.TimKiemHocSinh(hs['MaHocSinh'], namtaolop=namtaolop, key="info") for hs in hocsinhs]
 
-        solop = len(dao.GetMaLop(namtaolop))
+        solop = len(dao.GetMaLop(namtaolop = namtaolop, tenkhoi = tenkhoi))
 
         dshocsinhnotlop = dao.HocSinhNotLop()
 
@@ -1030,9 +1035,13 @@ def timkkiemhocsinhonekhoi():
 
         currentyear = dao.CurrentYear()
 
-        solop = len(dao.GetMaLop(currentyear))
+        solop = len(dao.GetMaLop(namtaolop = currentyear, tenkhoi = '10'))
 
-        hocsinhs = dao.GetHocSinhByTenHoTenEmailPhone(inputsearch=textinput, namtaolop=currentyear)
+
+        hocsinhs = dao.GetHocSinhByTenHoTenEmailPhone(inputsearch=textinput, namtaolop=currentyear ,tenkhoi = '10')
+
+
+        print(hocsinhs)
 
         dshocsinh = [dao.TimKiemHocSinh(hs['MaHocSinh'], namtaolop=currentyear, key="info") for hs in hocsinhs]
 
@@ -1041,32 +1050,55 @@ def timkkiemhocsinhonekhoi():
     return redirect(url_for('index'))
 
 
-@app.route('/user/nhapdiem/loadalllopofkhoi/<makhoi>', methods=['POST'])
-def loadallmon(makhoi):
-    namtaolop = int(dao.CurrentYear()) - int(makhoi)
-
-    alllop = dao.LoadLopEdHoc(namtaolop=str(namtaolop))
-    allmon = dao.LoadAllMon()
+@app.route('/user/nhapdiem/loadalllopofkhoi/<mahocki>/<tenkhoi>', methods=['POST'])
+def loadallmon(mahocki, tenkhoi):
 
 
-    alllop = [{"TenLop": i.TenLop, "MaLop": i.MaLop} for i in alllop]
-    allmon = [{"TenMonHoc": i.TenMonHoc, "MaMonHoc": i.MaMonHoc} for i in allmon]
+    info = dao.LoadLopEdHocInHocKiByMaHocKi(mahocki = mahocki , tenkhoi = tenkhoi)
+
+    lophocinhockis = [malop[0] for malop in info['malops']]
+
 
 
     return jsonify({
         "success": True,
-        "alllop": alllop,
-        "allmon": allmon
+        "lophocinhockis": lophocinhockis
     })
 
 
 @app.route('/user/dieuchinhdanhsachlop/loadsolop/<value>', methods=['POST'])
 def loadsolop(value):
-    namtaolop = str(int(dao.CurrentYear()) - int(value))
+    if value == 'Mới':
+        namtaolop = dao.CurrentYear()
+        value = '10'
+    else:
+        namtaolop = str(int(dao.CurrentYear()) - 1 )
 
-    solop = len(dao.GetMaLop(namtaolop=namtaolop))
+    solop = len(dao.GetMaLop(namtaolop=namtaolop, tenkhoi = value ))
+
+    print(solop)
 
     return jsonify({"solop": solop})
+
+
+@app.route('/user/nhapdiem/loadalllopedinhockied/<value>/<feild>', methods=['POST'])
+def loadalllopedinhockied(value, feild):
+
+    info = dao.LoadLopEdHocInHocKiByMaHocKi(value)
+
+    lophocinhockis = [ malop[0] for malop in info['malops']]
+
+    dskhoi = [{"MaKhoi": khoi.MaKhoi, "TenKhoi": khoi.TenKhoi} for khoi in dao.LoadKhoi() if khoi.TenKhoi in info['dskhoi']]
+
+
+
+    return jsonify({
+        "success": True,
+        "lophocinhockis": lophocinhockis,
+        "dskhoi": dskhoi
+    })
+
+
 
 
 @login.user_loader
@@ -1079,9 +1111,10 @@ def login_admin_process():
     username = request.form.get('username')
     password = request.form.get('password')
     user = dao.Check_login(username=username, password=password)
+    print(user.role)
     if user.role == models.Role.Admin:
         login_user(user)
-        return redirect('/admin')
+    return redirect('/admin')
 
 
 if __name__ == "__main__":

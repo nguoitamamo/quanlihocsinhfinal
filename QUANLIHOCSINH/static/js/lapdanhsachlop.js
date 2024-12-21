@@ -19,26 +19,5 @@ function LoadLopOfKhoi(makhoi) {
 }
 
 
-function SearchHocSinh(input) {
-
-    alert(input)
 
 
-}
-
-
-function TimKiemHocSinhNew() {
-
-    const textinput = document.querySelector('.btn_timkiem').value
-
-
-
-    fetch(`/user/danhsachlop/timkiemhocsinh/${textinput}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-
-    })
-
-}

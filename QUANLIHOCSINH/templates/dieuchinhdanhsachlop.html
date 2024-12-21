@@ -117,7 +117,7 @@
                     <button class="btn btn-sua" data-bs-toggle="modal"
                             data-bs-target="#modal-createlop">Tạo lớp
                     </button>
-                    <button class="btn btn-sua" onclick="AddHocSinhToLop('{{ lop }}')">Thêm</button>
+                    <button class="btn btn-sua" onclick="AddHocSinhToLop('{{ malop }}')">Thêm</button>
 
                 </div>
             </div>
@@ -193,7 +193,7 @@
     <div class="container mt-3">
         {% if key %}
         {% else %}
-            <h2>Lớp: {{ lop }}</h2>
+            <h2>Lớp: {{ malop[1:].split('_')[0] }}</h2>
             <p>Sĩ số: {{ lophocsinh | length }}</p>
         {% endif %}
         <div>
@@ -239,12 +239,12 @@
                                 <td class="xoa">
                                     {% if key %}
                                         <button style="background: none; border: none"
-                                                onclick="RemoveHS('{{ info.UserID }}', '{{ info.MaLop[1:].split('_')[0] }}')">
+                                                onclick="RemoveHS('{{ info.UserID }}', '{{ info.MaLop }}')">
                                             <i class="fa-solid fa-minus"></i>
                                         </button>
                                     {% else %}
                                         <button style="background: none; border: none"
-                                                onclick="RemoveHS('{{ info.UserID }}', '{{ lop }}')">
+                                                onclick="RemoveHS('{{ info.UserID }}', '{{ malop }}')">
                                             <i class="fa-solid fa-minus"></i>
                                         </button>
                                     {% endif %}
@@ -273,7 +273,7 @@
                         <div class="form-row">
                             <label for="tenlop">Tên Lớp:</label>
                             <input type="text" id="tenlop"
-                                   value="{{ tenkhoi }}A{{ solop + 1 }}">
+                                   value="10A{{ solop + 1 }}" readonly>
 
                             <label for="textcondition">Lọc:</label>
                             <select name="" id="selectcondition">
@@ -373,7 +373,7 @@
             const pageitem = document.getElementById('page-item-solop');
 
 
-            fetch(`/user/dieuchinhdanhsachlop/loadsolop/${khoi.value}`, {
+            fetch(`/user/dieuchinhdanhsachlop/loadsolop/${khoi.textContent}`, {
                 method: 'post',
                 headers: {
                     'Content-Type': 'application/json',
@@ -400,6 +400,7 @@
                             a.id = `page-link-${i}`;
 
                             a.href = `/user/dieuchinhdanhsachlop?page=${i}&makhoi=${khoi.value}&tenkhoi=${khoi.textContent}`;
+
 
                             a.textContent = i;
 

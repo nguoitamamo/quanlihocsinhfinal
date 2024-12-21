@@ -91,7 +91,7 @@ class PermissionUser(db.Model):
 class MonHoc(db.Model):
     __tablename__ = 'monhoc'
     MaMonHoc = Column(String(20), primary_key=True)
-    TenMonHoc = Column(String(30), nullable=False)
+    TenMonHoc = Column(String(30), nullable=False, unique=True)
     GiangViens = relationship('GiangVien', backref='monhoc', lazy=True)
     Diems = relationship('Diem', backref='monhoc', lazy=True)
     Hocs = relationship('Hoc', backref='monhoc', lazy=True)

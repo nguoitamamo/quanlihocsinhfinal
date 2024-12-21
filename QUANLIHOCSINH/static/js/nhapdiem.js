@@ -2,10 +2,6 @@ const errorContainer = document.querySelector('.alert-danger');
 const errorText = document.getElementById('error');
 
 
-
-
-
-
 function Column15phut(state) {
 
 
@@ -213,11 +209,11 @@ function saveTableData(state) {
 
 }
 
-function LoadAlLLopAndMonOfKhoi(obj) {
+function LoadALlLopEdHocInHocKiEd(obj, feild) {
 
-    const makhoi = obj.options[obj.selectedIndex].value;
+    const value = obj.options[obj.selectedIndex].value;
 
-    fetch(`/user/nhapdiem/loadalllopofkhoi/${makhoi}`, {
+    fetch(`/user/nhapdiem/loadalllopedinhockied/${value}/${feild}`, {
         method: 'post',
         headers: {
             'Content-Type': 'application/json',
@@ -225,23 +221,71 @@ function LoadAlLLopAndMonOfKhoi(obj) {
     }).then(response => response.json())
         .then(data => {
             if (data.success) {
-                const alllop = data.alllop;
-                const allmon = data.allmon;
+                const lophocinhockis = data.lophocinhockis;
+                const dskhoi = data.dskhoi;
 
+                const khois = document.getElementById('dskhoi');
+                khois.innerHTML = '';
 
-                const LopSelect = document.querySelector("select[name='dslop']");
-
-                LopSelect.innerHTML = '';
-
-                alllop.forEach(lop => {
+                dskhoi.forEach(khoi => {
 
                     const option = document.createElement("option");
-                    option.text = `${lop.TenLop}`;
-                    option.value = `${lop.MaLop}`;
-                    LopSelect.add(option);
+                    option.text = `${khoi['TenKhoi']}`;
+                    option.value = `${khoi['MaKhoi']}`;
+                    khois.add(option);
                 });
 
-                MonOfLop(allmon);
+                AddLopEdInHocKi(lophocinhockis);
+
+                // MonOfLop(allmon);
+
+
+            } else {
+                alert(data.error);
+            }
+        })
+
+
+}
+
+function AddLopEdInHocKi(lophocinhockis) {
+
+    const LopSelect = document.querySelector("select[name='dslop']");
+
+    LopSelect.innerHTML = '';
+
+    lophocinhockis.forEach(malop => {
+
+        const option = document.createElement("option");
+        option.text = `${malop.slice(1).split('_')[0]}`;
+        option.value = `${malop}`;
+        LopSelect.add(option);
+    });
+
+}
+
+function LoadAlLLopOfKhoi(obj) {
+
+    const hocki = document.getElementById('hocki');
+    var mahocki = '0'
+    if ( hocki !== undefined) {
+        mahocki = hocki.options[hocki.selectedIndex].value;
+    }
+
+
+    const tenkhoi = obj.options[obj.selectedIndex].textContent;
+
+    fetch(`/user/nhapdiem/loadalllopofkhoi/${mahocki}/${tenkhoi}`, {
+        method: 'post',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    }).then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const lophocinhockis = data.lophocinhockis;
+
+                AddLopEdInHocKi(lophocinhockis);
 
 
             } else {
