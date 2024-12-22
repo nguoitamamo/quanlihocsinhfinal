@@ -18,6 +18,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:594362@localhost/Q
 app.config["PAGE_SIZE"] = 1
 
 app.config["MAX_SS_LOP"] = 40
+app.config["SI_SO_MIN"] = 15
+app.config["SI_SO_MAX"] = 20
 
 # app.config['SESSION_COOKIE_NAME'] = 'my_session_cookie'
 app.config['SESSION_COOKIE_HTTPONLY'] = True

@@ -959,6 +959,11 @@ def XoaMonHoc(mamonhoc):
 
     return False
 
+def LoadGiaoVienTeachMonHocByMaMonHoc(mamonhoc):
+    return models.GiangVien.query.filter(models.GiangVien.MaMonHoc == mamonhoc).all()
+
+
+
 
 
 
@@ -1062,4 +1067,7 @@ if __name__ == '__main__':
         # solop = ceil(sum_hoc_sinh_not_lop / app.config["MAX_SS_LOP"])
         # # print(solop)
         # Division_Class(solopcanchia= solop)
-        print(GetKhoi(makhoi = 2 ).TenKhoi)
+        monhoc_khoi_data = (db.session.query(models.MonHoc_Khoi.MaKhoi, models.MonHoc_Khoi.MaMonHoc, models.MonHoc.MaMonHoc, models.MonHoc.TenMonHoc, models.Khoi.MaKhoi, models.Khoi.TenKhoi)
+                            .join(models.Khoi, models.Khoi.MaKhoi == models.MonHoc_Khoi.MaKhoi)
+                            .join(models.MonHoc, models.MonHoc.MaMonHoc == models.MonHoc_Khoi.MaMonHoc).all())
+        print(monhoc_khoi_data)

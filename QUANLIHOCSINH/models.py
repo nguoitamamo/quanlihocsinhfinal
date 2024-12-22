@@ -140,6 +140,7 @@ class Hoc(db.Model):
     MaHocKi = Column(String(20), ForeignKey('hocki.MaHocKi'), nullable=False)
 
 
+
 class HocSinh(db.Model):
     __tablename__ = "hocsinh"  # Corrected typo here
     MaHocSinh = Column(String(20), ForeignKey('account.id'),primary_key=True)

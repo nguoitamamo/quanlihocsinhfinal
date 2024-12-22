@@ -465,7 +465,7 @@ def SaveInforHocSinh():
 
             data = request.form.copy()
 
-            if 15 <= age <= 20:
+            if app.config["SI_SO_MIN"] <= age <= app.config["SI_SO_MIN"]:
                 del data['diemTbDauVao']
                 del data['sdt']
 
@@ -1113,7 +1113,14 @@ def xoamonhoc_admin(mamonhoc):
     state_xoa = dao.XoaMonHoc(mamonhoc= mamonhoc)
 
     return jsonify({"success":True})
+@app.route('/admin/loadgiaovien/<mamonhoc>', methods=["post"])
+def loadgiaovien(mamonhoc):
 
+    giangviens = dao.LoadGiaoVienTeachMonHocByMaMonHoc(mamonhoc=mamonhoc)
+
+    giangviens = [ { "MaGiangVien": giangvien.MaGiangVien , "MaMonHoc": giangvien.MaMonHoc  } for giangvien in giangviens ]
+
+    return jsonify({"giangviens": giangviens})
 
 
 if __name__ == "__main__":

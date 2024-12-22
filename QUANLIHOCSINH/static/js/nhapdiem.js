@@ -17,6 +17,7 @@ function Column15phut(state) {
             } else {
                 errorText.innerText = data.error; // Hiển thị nội dung lỗi
                 errorContainer.style.display = "block";
+                errorContainer.style.display = "block";
             }
         })
 
