@@ -103,7 +103,7 @@
                     {% endfor %}
                 </select>
                  <label for="dskhoi">Khối: </label>
-                <select name="dskhoi" id="dskhoi" onclick="LoadAlLLopOfKhoi(this)">
+                <select name="dskhoi" id="dskhoi" onclick="LoadAlLLopOfKhoi(this, 'nhap')">
                     <option value="0">Khối</option>
                     {% for i in dskhoi %}
                         {% if i.MaKhoi == makhoi %}

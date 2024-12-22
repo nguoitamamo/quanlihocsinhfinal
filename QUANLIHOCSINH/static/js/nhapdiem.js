@@ -264,18 +264,18 @@ function AddLopEdInHocKi(lophocinhockis) {
 
 }
 
-function LoadAlLLopOfKhoi(obj) {
+function LoadAlLLopOfKhoi(obj, feild) {
 
     const hocki = document.getElementById('hocki');
-    var mahocki = '0'
+    var value = '0'
     if ( hocki !== undefined) {
-        mahocki = hocki.options[hocki.selectedIndex].value;
+        value = hocki.options[hocki.selectedIndex].value;
     }
 
 
     const tenkhoi = obj.options[obj.selectedIndex].textContent;
 
-    fetch(`/user/nhapdiem/loadalllopofkhoi/${mahocki}/${tenkhoi}`, {
+    fetch(`/user/nhapdiem/loadalllopofkhoi/${value}/${tenkhoi}/${feild}`, {
         method: 'post',
         headers: {
             'Content-Type': 'application/json',

@@ -96,6 +96,13 @@ class MonHoc(db.Model):
     Diems = relationship('Diem', backref='monhoc', lazy=True)
     Hocs = relationship('Hoc', backref='monhoc', lazy=True)
 
+class MonHoc_Khoi(db.Model):
+    __tablename__ = 'monhoc_khoi'
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    MaMonHoc = Column(String(20), ForeignKey('monhoc.MaMonHoc'), nullable=False)
+    MaKhoi = Column(Integer, ForeignKey('khoi.MaKhoi'), nullable=False)
+    MonHocs = relationship('MonHoc', backref='monhoc_khoi', lazy=True)
+    Khois = relationship('Khoi', backref='monhoc_khoi', lazy=True)
 
 class GiangVien(db.Model):
     __tablename__ = 'giangvien'

@@ -1,3 +1,4 @@
+from operator import or_
 from pstats import Stats
 
 from QUANLIHOCSINH import app, db
@@ -5,54 +6,65 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_admin import BaseView, expose
 import models
-from flask import redirect,request
+from flask import redirect, request
 import dao
 from flask_login import current_user, logout_user
+from flask import url_for
+
 admin = Admin(app=app, name="E-commerce Administration", template_mode='bootstrap4')
+
 
 class AdminView(ModelView):
     column_display_pk = True
     can_export = True
+
     def is_accessible(self):
         return current_user.is_authenticated and current_user.role.__eq__(models.Role.Admin)
 
 
 class ThongbaoView(AdminView):
-
     column_list = ['PermissionID', 'UserID']
 
     column_searchable_list = ['PermissionID', 'UserID']
-    # column_exclute_list = ['']
 
     column_labels = {
         'PermissionID': 'Mã quyền',
         'UserID': 'Mã người dùng'
     }
-    list_template  = 'admin/thongbao.html'
+    list_template = 'admin/thongbao.html'
 
 
-class ViewMonHoc(AdminView):
-    # column_list = ['MaMonHoc', 'UserID']
+from wtforms_sqlalchemy.fields import QuerySelectField
 
-    # column_searchable_list = [''] tìm kieesm
-    # column_exclute_list = ['']
+
+class ViewGiangVien(ModelView):
+    column_list = ['MaGiangVien', 'MaMonHoc', 'Hocs']
 
     column_labels = {
+        'MaGiangVien': 'Mã giảng viên',
         'MaMonHoc': 'Mã môn học',
-        'TenMonHoc': 'Tên môn học'
+        'Hocs': 'Danh sách lớp dạy'
     }
+    form_columns = ['MaGiangVien', 'Hocs']
+
+
+
+
+
+class ViewMonHocKhoi(ModelView):
+    column_list = ['MaMonHoc', 'MaKhoi', 'MonHocs', 'Khois']
+
+    # Các nhãn cho cột
+    column_labels = {
+        'MaMonHoc': 'Mã môn học',
+        'MaKhoi': 'Mã khối'
+    }
+
+    form_columns = ['MaMonHoc', 'MaKhoi']
+    list_template = 'admin/monhocandkhoi.html'
 
 
 class ViewAccout(AdminView):
-
-
-    # def get_query(self):
-    #     return super(ViewAccout, self).get_query().filter(models.Account.Active == True)
-    #
-    # # Đảm bảo bộ đếm cũng áp dụng bộ lọc Active = True
-    # def get_count_query(self):
-    #     return super(ViewAccout, self).get_count_query().filter(models.Account.Active == True)
-
     column_searchable_list = ['TenDangNhap', 'id', 'NgayTao']
 
     column_labels = {
@@ -63,21 +75,14 @@ class ViewAccout(AdminView):
 
     }
 
+
 class ThongTinUser(AdminView):
-
     column_list = ['Ho', 'Ten', 'NgaySinh', 'GioiTinh', 'DiaChi', 'Email']
-
-    # def get_query(self):
-    #     # Lấy danh sách học sinh chưa có lớp
-    #     hoc_sinh_chua_lop = dao.HocSinhNotLop(449)  # Dựng phương thức này trả về danh sách học sinh chưa có lớp
-    #     # Tạo truy vấn lọc các học sinh chưa có lớp
-    #     query = super(ThongTinUser, self).get_query()
-    #     return query.filter(models.UserInfor.UserID.in_([i.MaHocSinh for i in hoc_sinh_chua_lop]))
 
     column_searchable_list = ['Ho', 'Ten', 'NgaySinh', 'GioiTinh', 'DiaChi', 'Email']
 
     column_labels = {
-        'UserID' : 'Mã người dùng',
+        'UserID': 'Mã người dùng',
         'Ho': 'Họ',
         'Ten': 'Tên',
         'NgaySinh': 'Ngày sinh',
@@ -86,32 +91,26 @@ class ThongTinUser(AdminView):
         'Email': 'Email'
     }
 
+
 class ViewLop(AdminView):
-
-    # column_list = ['MaMonHoc', 'UserID']
-
     column_searchable_list = ['MaLop', 'TenLop']
-    # column_exclute_list = ['']
-
     column_labels = {
         'MaLop': 'Mã lớp',
         'TenLop': 'Tên lớp',
-        'SiSo' : 'Sĩ số'
+        'SiSo': 'Sĩ số'
     }
 
 
 class ViewLopHocSinh(AdminView):
-
     can_export = True
     column_list = ['MaLop', 'MaHocSinh', 'NamTaoLop']
 
-    column_searchable_list = ['id' , 'MaLop', 'MaHocSinh', 'NamTaoLop']
-    # column_exclute_list = ['']
+    column_searchable_list = ['id', 'MaLop', 'MaHocSinh', 'NamTaoLop']
 
     column_labels = {
         'MaLop': 'Mã lớp',
-        'MaHocSinh' : 'Mã học sinh',
-        'NamTaoLop' : 'Ngày tạo'
+        'MaHocSinh': 'Mã học sinh',
+        'NamTaoLop': 'Ngày tạo'
     }
 
 
@@ -119,12 +118,12 @@ class ViewPerMission(AdminView):
     can_export = True
 
     column_searchable_list = ['Value']
-    # column_exclute_list = ['']
 
     column_labels = {
         'PermissionID': 'Mã quyền',
         'Value': 'Quyền'
     }
+
 
 class AuthenticatedView(BaseView):
     def is_accessible(self):
@@ -137,13 +136,15 @@ class LogoutView(AuthenticatedView):
         logout_user()
         return redirect('/admin')
 
+
 class ThongKeView(AuthenticatedView):
     @expose('/')
     def index(self):
         danh_sach_mon_hoc = dao.Load_MonHoc()
         danh_sach_hoc_ki = dao.load_hoc_ki()
 
-        return self.render('admin/baocaothongke.html', danh_sach_mon_hoc=danh_sach_mon_hoc, danh_sach_hoc_ki=danh_sach_hoc_ki)
+        return self.render('admin/baocaothongke.html', danh_sach_mon_hoc=danh_sach_mon_hoc,
+                           danh_sach_hoc_ki=danh_sach_hoc_ki)
 
     @expose('/submit', methods=["POST"])
     def submit(self):
@@ -182,9 +183,99 @@ class ThongKeView(AuthenticatedView):
                            TenNamHoc=TenNamHoc,
                            Lop=ds_lop)
 
+class MonHocKhoiView(AuthenticatedView):
+        @expose('/')
+        def index(self):
+            monhoc_data = models.MonHoc.query.all()
+            monhoc_khoi_data = models.MonHoc_Khoi.query.all()
+            dskhoi = models.Khoi.query.all()
+
+            return self.render('admin/monhoc_khoi.html',
+                               monhoc_data=monhoc_data,
+                               monhoc_khoi_data=monhoc_khoi_data,
+                               dskhoi = dskhoi)
+
+        @expose('/create_monhoc', methods=['POST'])
+        def create_monhoc(self):
+            ma_monhoc = request.form.get('MaMonHoc')
+            ten_monhoc = request.form.get('TenMonHoc')
+            monhoc = models.MonHoc ( MaMonHoc = ma_monhoc, TenMonHoc = ten_monhoc)
+            db.session.add(monhoc)
+            db.session.commit()
+            return redirect(url_for('.index'))
+
+        @expose('/edit/<ma_monhoc>', methods=['POST'])
+        def edit_monhoc(self, ma_monhoc):
+
+            ma_monhoc_new = request.form.get('MaMonHoc')
+            ten_monhoc_new = request.form.get('TenMonHoc')
+
+            if ma_monhoc_new and ten_monhoc_new:
+
+                monhoc = models.MonHoc.query.filter_by(MaMonHoc=ma_monhoc).first()
+
+                if monhoc:
+                    monhoc.MaMonHoc = ma_monhoc_new
+                    monhoc.TenMonHoc = ten_monhoc_new
+
+                    db.session.commit()
+
+
+            return redirect(url_for('.index'))
+
+        @expose('/timkiem_monhoc', methods=['POST'])
+        def timkiem_monhoc(self):
+
+            inputsearch = request.form.get('inputsearch')
+            monhoc_data = models.MonHoc.query.filter(
+                or_(
+                    models.MonHoc.TenMonHoc.ilike(f"%{inputsearch}%"),
+                    models.MonHoc.MaMonHoc.ilike(f"%{inputsearch}%")
+                )).all()
+            monhoc_khoi_data = models.MonHoc_Khoi.query.all()
+
+            return self.render('admin/monhoc_khoi.html',
+                               monhoc_data=monhoc_data,
+                               monhoc_khoi_data=monhoc_khoi_data, inputsearch=inputsearch,
+                               dskhoi=models.Khoi.query.all()
+                               )
+
+
+        @expose('/create', methods=['POST'])
+        def create_monhoc_khoi(self):
+            ma_monhoc = request.form.get('MaMonHoc')
+            ma_khoi = request.form.get('MaKhoi')
+
+            new_monhoc_khoi = models.MonHoc_Khoi(MaMonHoc=ma_monhoc, MaKhoi=ma_khoi)
+            db.session.add(new_monhoc_khoi)
+            db.session.commit()
+
+            return redirect(url_for('.index'))
+
+        @expose('/delete/<int:id>', methods=['POST'])
+        def delete_monhoc_khoi(self, id):
+
+            record = models.MonHoc_Khoi.query.get(id)
+            if record:
+                db.session.delete(record)
+                db.session.commit()
+            return redirect(url_for('.index'))
+
+class ViewMonHoc(ModelView):
+    column_list = ['MaMonHoc', 'TenMonHoc']
+
+    column_labels = {
+        'MaMonHoc': 'Mã môn học',
+        'TenMonHoc': 'Tên môn học',
+    }
+
+    form_columns = ['MaMonHoc', 'TenMonHoc']
+
+
+
 admin.add_view(ViewAccout(models.Account, db.session, name="Tài khoản"))
 admin.add_view(ThongTinUser(models.UserInfor, db.session, name="Thông tin tài khoản"))
-admin.add_view(ViewMonHoc(models.MonHoc, db.session, name="Môn học"))
+admin.add_view(ViewGiangVien(models.GiangVien, db.session, name="Giảng viên"))
 admin.add_view(ViewLop(models.Lop, db.session, name="Lớp"))
 admin.add_view(ViewLopHocSinh(models.LopHocSinh, db.session, name="Lớp-Học sinh"))
 admin.add_view(ViewPerMission(models.Permission, db.session, name="Quyền"))
@@ -193,3 +284,9 @@ admin.add_view(ThongbaoView(models.PermissionUser, db.session, name="Thông báo
 
 admin.add_view(ThongKeView(name='Thống kê'))
 admin.add_view(LogoutView(name='Đăng xuất'))
+
+
+
+admin.add_view(ViewMonHoc(models.MonHoc, db.session, name="Môn học"))
+admin.add_view(MonHocKhoiView(name='monhoc_khoi'))
+

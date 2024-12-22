@@ -579,6 +579,8 @@ def  GetHocSinhByTenHoTenEmailPhone(inputsearch, malop=None, namtaolop=None, ten
 #
 #     return None
 
+def GetKhoi(makhoi = None):
+    return models.Khoi.query.filter(models.Khoi.MaKhoi == makhoi).first()
 
 def GetHocKi(tenhocki, namhoc):
     return db.session.query(models.HocKi.MaHocKi).filter(models.HocKi.TenHocKi == tenhocki,
@@ -913,6 +915,51 @@ def LoadLopEdHocInHocKiByMaHocKi(mahocki, tenkhoi = None):
              "dskhoi": dskhoi}
 
 
+def LoadKhoiAnDsMaLopInHocKi( namhoc , tenkhoi = None, key = None ):
+    lophocinhockis = []
+    dskhoi = []
+    info1 = []
+    info2 = []
+
+    mahocki1 = '1_' + namhoc
+    mahocki2 = '2_' + namhoc
+    if tenkhoi:
+        info1 = LoadLopEdHocInHocKiByMaHocKi(mahocki=mahocki1, tenkhoi= tenkhoi)
+        info2 = LoadLopEdHocInHocKiByMaHocKi(mahocki=mahocki2, tenkhoi= tenkhoi)
+    else:
+        info1 = LoadLopEdHocInHocKiByMaHocKi(mahocki=mahocki1)
+        info2 = LoadLopEdHocInHocKiByMaHocKi(mahocki=mahocki2)
+
+
+    [lophocinhockis.append(malop[0]) for malop in info1['malops'] if malop[0] not in lophocinhockis]
+    [lophocinhockis.append(malop[0]) for malop in info2['malops'] if malop[0] not in lophocinhockis]
+
+
+    if key:
+        [dskhoi.append(khoi) for khoi in LoadKhoi() if khoi.TenKhoi in info1['dskhoi'] and khoi not in dskhoi]
+        [dskhoi.append(khoi) for khoi in LoadKhoi() if khoi.TenKhoi in info2['dskhoi'] and khoi not in dskhoi]
+
+
+    return {
+        "lophocinhockis" : lophocinhockis,
+        "dskhoi" : dskhoi
+    }
+
+
+def XoaMonHoc(mamonhoc):
+
+
+    monhoc = models.MonHoc.query.filter(models.MonHoc.MaMonHoc == mamonhoc).first()
+
+    if monhoc:
+        db.session.delete(monhoc)
+        db.session.commit()
+        return True
+
+
+    return False
+
+
 
 
 
@@ -1015,4 +1062,4 @@ if __name__ == '__main__':
         # solop = ceil(sum_hoc_sinh_not_lop / app.config["MAX_SS_LOP"])
         # # print(solop)
         # Division_Class(solopcanchia= solop)
-       print(LoadLopEdHocInHocKiByMaHocKi(mahocki = '1_2023-2024', tenkhoi = '10'))
+        print(GetKhoi(makhoi = 2 ).TenKhoi)

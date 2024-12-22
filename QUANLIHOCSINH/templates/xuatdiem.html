@@ -45,9 +45,10 @@
                 </div>
             </div>
         {% endif %}
-         <form action="{{ url_for('xuatdiemlop') }}" method="POST" class="form-container">
+        <form action="{{ url_for('xuatdiemlop') }}" method="POST" class="form-container">
 
             <div class="form-row">
+                <h3 >BẢNG ĐIỂM MÔN HỌC</h3>
                 <label for="lopLabel">Tìm kiếm học sinh: </label>
                 <div>
 
@@ -67,9 +68,9 @@
 
                 </div>
 
-             <label for="monhocLabel">Năm học: </label>
-                <select name="hocki" id="hocki" onclick = "LoadALlLopEdHocInHocKiEd(this , 'xuat')">
-                    <option selected disabled>Chọn </option>
+                <label for="monhocLabel">Năm học: </label>
+                <select name="hocki" id="hocki" onclick="LoadALlLopEdHocInHocKiEd(this , 'xuat')">
+                    <option selected disabled>Chọn</option>
                     {% for HK in danh_sach_hoc_ki %}
                         {% if HK.NamHoc == namhoc %}
                             <option selected value="{{ HK.NamHoc }}">{{ HK.NamHoc }}</option>
@@ -81,21 +82,21 @@
                 </select>
 
 
-{#                 <label for="monhocLabel">Học kì: </label>#}
-{#                <select name="hocki" id="hocki" onclick = "LoadALlLopEdHocInHocKiEd(this)">#}
-{#                    <option selected disabled>Chọn học kỳ</option>#}
-{#                    {% for HK in danh_sach_hoc_ki %}#}
-{#                        {% if HK.MaHocKi == mahocki %}#}
-{#                            <option selected value="{{ HK.MaHocKi }}">Học kỳ {{ HK.TenHocKi }}#}
-{#                                - {{ HK.NamHoc }}</option>#}
-{#                        {% else %}#}
-{#                            <option value="{{ HK.MaHocKi }}">Học kỳ {{ HK.TenHocKi }} - {{ HK.NamHoc }}</option>#}
-{#                        {% endif %}#}
-{##}
-{#                    {% endfor %}#}
-{#                </select>#}
-                 <label for="dskhoi">Khối: </label>
-                <select name="dskhoi" id="dskhoi" onclick="LoadAlLLopOfKhoi(this)">
+                {#                 <label for="monhocLabel">Học kì: </label>#}
+                {#                <select name="hocki" id="hocki" onclick = "LoadALlLopEdHocInHocKiEd(this)">#}
+                {#                    <option selected disabled>Chọn học kỳ</option>#}
+                {#                    {% for HK in danh_sach_hoc_ki %}#}
+                {#                        {% if HK.MaHocKi == mahocki %}#}
+                {#                            <option selected value="{{ HK.MaHocKi }}">Học kỳ {{ HK.TenHocKi }}#}
+                {#                                - {{ HK.NamHoc }}</option>#}
+                {#                        {% else %}#}
+                {#                            <option value="{{ HK.MaHocKi }}">Học kỳ {{ HK.TenHocKi }} - {{ HK.NamHoc }}</option>#}
+                {#                        {% endif %}#}
+                {##}
+                {#                    {% endfor %}#}
+                {#                </select>#}
+                <label for="dskhoi">Khối: </label>
+                <select name="dskhoi" id="dskhoi" onclick="LoadAlLLopOfKhoi(this, 'xuat')">
                     <option value="0">Khối</option>
                     {% for i in dskhoi %}
                         {% if i.MaKhoi == makhoi %}
@@ -105,16 +106,16 @@
                         {% endif %}
                     {% endfor %}
                 </select>
-             <label for="lopLabel">Lớp: </label>
+                <label for="lopLabel">Lớp: </label>
                 <select name="dslop" id="dslop" onclick="updateMonHocOfLop(this)">
                     <option value="">Lớp</option>
 
                     {% for i in dslopcheckbox %}
-                        {% if i.MaLop == malop %}
-                            <option selected value="{{ i.MaLop }}">{{ i.MaLop[1:].split('_')[0] }}</option>
+                        {% if i == malop %}
+                            <option selected value="{{ i }}">{{ i[1:].split('_')[0] }}</option>
 
                         {% else %}
-                            <option value="{{ i.MaLop }}">{{ i.MaLop[1:].split('_')[0] }}</option>
+                            <option value="{{ i }}">{{ i[1:].split('_')[0] }}</option>
                         {% endif %}
                     {% endfor %}
                 </select>
@@ -134,7 +135,6 @@
                     {% endfor %}
 
                 </select>
-
 
 
             </div>
@@ -165,13 +165,13 @@
                     {% if namhoc %}
                         <th class="customer_width_header">Năm học: {{ namhoc }}</th>
                     {% endif %}
-                    {% if giaovienhk1 and giaovienhk2 %}
+                    {% if giaovienhk1 or giaovienhk2 %}
                         {% if giaovienhk1.UserID == giaovienhk2.UserID %}
                             <th class="customer_width_header">Giáo viên: {{ giaovienhk1.Ho }} {{ giaovienhk1.Ten }}</th>
 
                         {% else %}
                             <th class="customer_width_header">Giáo viên: {{ giaovienhk1.Ho }} {{ giaovienhk1.Ten }}
-                                - {{ giaovienhk2.Ho }} {{ giaovienhk2.Ten }}</th>
+                                 {{ giaovienhk2.Ho }} {{ giaovienhk2.Ten }}</th>
                         {% endif %}
                     {% endif %}
 
