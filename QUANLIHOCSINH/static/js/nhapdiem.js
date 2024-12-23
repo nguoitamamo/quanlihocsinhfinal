@@ -5,7 +5,7 @@ const errorText = document.getElementById('error');
 function Column15phut(state) {
 
 
-    fetch(`${state}`, {
+    fetch(`/user/nhapdiem/column15phut/${state}`, {
         method: 'put',
         headers: {
             'Content-Type': 'application/json',
