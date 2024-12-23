@@ -32,7 +32,7 @@ def signinuser():
 
         user = dao.Check_login(username, password)
 
-        if user.role:
+        if user and user.role:
             login_user(user=user)
             return redirect(url_for("index"))
 
@@ -1102,8 +1102,8 @@ def login_admin_process():
     username = request.form.get('username')
     password = request.form.get('password')
     user = dao.Check_login(username=username, password=password)
-    print(user.role)
-    if user.role == models.Role.Admin:
+
+    if user and user.role == models.Role.Admin:
         login_user(user)
     return redirect('/admin')
 
