@@ -8,7 +8,7 @@ from email.mime.text import MIMEText
 import os
 import pandas as pd
 from math import ceil
-from dao import GetLopByMa, GetHocSinhByTenHoTenEmailPhone, LoadLop
+from dao import  LoadLop
 
 dataframe1 = pd.read_excel(os.getcwd() + '\\templates\\layout\\infor.xlsx', dtype={"Số điện thoại": str})
 
@@ -128,60 +128,6 @@ def SaveIntoSession(dshocsinh):
     return dic
 
 
-# class UserInfor():
-#     def __init__(self):
-
-
-def SuggestedLop(ds, keyword):
-    res = []
-
-    l, r = 0, len(ds) - 1
-
-    for i in range(len(keyword)):
-        c = keyword[i]
-
-        while l <= r and (len(ds[l]) <= i or ds[l][i] != c):
-            l += 1
-
-        while l <= r and (len(ds[r]) <= i or ds[r][i] != c):
-            r -= 1
-
-    res.append([])
-    remain = r - l + 1
-    for j in range(min(5, remain)):
-        res[-1].append(ds[l + j])
-
-    return res
-
-
-def CalDiemTbHocSinh(diemhk1, diemhk2, max_15phut_hocki1, max_1tiet_hocki1,
-                     max_15phut_hocki2, max_1tiet_hocki2, namtaolop=None):
-    return DiemHocSinh(mahocsinh=diemhk1['diemdshocsinh'][i]['MaHocSinh'],
-                                        hoten=diemhk1['diemdshocsinh'][i]['HoTen'],
-                                        listdiem15phuthk1=diemhk1['diemdshocsinh'][i]['15phut'],
-                                        listdiem1tiethk1=diemhk1['diemdshocsinh'][i]['1tiet'],
-                                        listdiem15phuthk2=diemhk2['diemdshocsinh'][i]['15phut'],
-                                        listdiem1tiethk2=diemhk2['diemdshocsinh'][i]['1tiet'],
-                                        listdiemcuoikihk1=diemhk1['diemdshocsinh'][i]['diemthi'],
-                                        listdiemcuoikihk2=diemhk2['diemdshocsinh'][i]['diemthi'],
-                                        max_15phut_hocki1=max_15phut_hocki1,
-                                        max_1tiet_hocki1=max_1tiet_hocki1,
-                                        max_15phut_hocki2=max_15phut_hocki2,
-                                        max_1tiet_hocki2=max_1tiet_hocki2,
-                                        namtaolop=namtaolop)
-
-
-def GetMa(inputsearch, namtaolop):
-    hocsinhs = GetHocSinhByTenHoTenEmailPhone(inputsearch=inputsearch, namtaolop=namtaolop)
-
-    listmalop = []
-
-    for hs in hocsinhs:
-        listmalop.append(hs['MaLop'])
-
-    print(listmalop)
-
-    return listmalop
 
 
 def GetDsHocSinh( listmalop , listmahocsinh, mamonhoc, namhoc):
@@ -218,7 +164,7 @@ def GetDsHocSinh( listmalop , listmahocsinh, mamonhoc, namhoc):
                                                max_1tiet_hocki1=max_1tiet_hocki1,
                                                max_15phut_hocki2=max_15phut_hocki2,
                                                max_1tiet_hocki2=max_1tiet_hocki2,
-                                                malop = listmalop[k]
+                                               malop = listmalop[k]
                                                ))
 
     return dshocsinhnew
