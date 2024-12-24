@@ -30,6 +30,11 @@ class Account(db.Model, UserMixin):
     role = Column(Enum(Role), default=Role.GiangVien)
 
 
+    __table_args__ = (
+        db.Index('idx_account', 'id'),
+    )
+
+
 class UserInfor(db.Model):
     __tablename__ = 'userinfor'
     UserID = Column(String(20),  ForeignKey('account.id'), primary_key=True)
@@ -41,6 +46,11 @@ class UserInfor(db.Model):
     DiaChi = Column(String(100), nullable=False)
     Email = Column(String(50), nullable=False, unique=True)
     Phones = relationship('Phone', backref='userinfor', lazy=True)
+
+    __table_args__ = (
+        db.Index('idx_userinfor', 'UserID'),
+    )
+
 
 
 class Token(db.Model):
@@ -77,17 +87,6 @@ class PermissionUser(db.Model):
         return f"<Permission(Permission={self.PermissionID}, Value='{self.Value}')>"
 
 
-# class Admin(db.Model):
-#     __tablename__ = 'admin'
-#     AdminID = Column(String(20),ForeignKey('account.id') , primary_key=True)
-#
-#
-#
-# class NhanVienBoPhanKhac(db.Model):
-#     __tablename__ = 'nhanvienbophankhac'
-#     MaNV = Column(String(20), ForeignKey('account.id'),primary_key=True)
-
-
 class MonHoc(db.Model):
     __tablename__ = 'monhoc'
     MaMonHoc = Column(String(20), primary_key=True)
@@ -103,6 +102,12 @@ class MonHoc_Khoi(db.Model):
     MaKhoi = Column(Integer, ForeignKey('khoi.MaKhoi'), nullable=False)
     MonHocs = relationship('MonHoc', backref='monhoc_khoi', lazy=True)
     Khois = relationship('Khoi', backref='monhoc_khoi', lazy=True)
+
+
+    __table_args__ = (
+        db.Index('idx_monhoc_khoi', 'MaMonHoc' , 'MaKhoi'),
+    )
+
 
 class GiangVien(db.Model):
     __tablename__ = 'giangvien'
@@ -139,6 +144,9 @@ class Hoc(db.Model):
     MaGiangVien = Column(String(20), ForeignKey('giangvien.MaGiangVien'), nullable=False)
     MaHocKi = Column(String(20), ForeignKey('hocki.MaHocKi'), nullable=False)
 
+    __table_args__ = (
+        db.Index('idx_hoc', 'MaLop' , 'MaHocKi'),
+    )
 
 
 class HocSinh(db.Model):
@@ -148,6 +156,10 @@ class HocSinh(db.Model):
     Lop_HocSinhs = relationship('LopHocSinh', backref='hocsinh', lazy=True)
     Diems = relationship('Diem', backref='hocsinh', lazy=True)
 
+    __table_args__ = (
+        db.Index('idx_hocsinh', 'MaHocSinh'),
+    )
+
 
 class LopHocSinh(db.Model):
     __tablename__="lophocsinh"
@@ -155,6 +167,10 @@ class LopHocSinh(db.Model):
     MaLop = Column(String(20), ForeignKey('lop.MaLop'),nullable=False)
     MaHocSinh = Column(String(20), ForeignKey('hocsinh.MaHocSinh'), nullable=False)
     NamTaoLop = Column(String(10), nullable=False)
+
+    __table_args__ = (
+        db.Index('idx_lophocsinh', 'MaLop', 'MaHocSinh'),
+    )
 
 
 class HocKi(db.Model):
@@ -173,6 +189,10 @@ class Diem(db.Model):
     MaHocSinh = Column(String(20), ForeignKey('hocsinh.MaHocSinh'), nullable=False)
     MaMonHoc = Column(String(20), ForeignKey('monhoc.MaMonHoc'), nullable=False)
     MaHocKi = Column(String(20), ForeignKey('hocki.MaHocKi'), nullable=False)
+
+    __table_args__ = (
+        db.Index('idx_diem', 'MaHocSinh' , 'MaMonHoc', 'MaHocKi'),
+    )
 
 
 if __name__ == '__main__':

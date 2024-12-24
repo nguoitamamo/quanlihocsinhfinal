@@ -839,6 +839,7 @@ def xuatdiemlop():
         data = request.form.copy()
 
         makhoi = int(data['dskhoi'])
+
         tenkhoi = dao.GetKhoi(makhoi = makhoi).TenKhoi
 
         namtaolop = data['hocki'].split('-')[0]

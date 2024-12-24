@@ -181,7 +181,6 @@ class ThongKeView(AuthenticatedView):
                            Lop=ds_lop)
 
 
-from sqlalchemy.orm import aliased
 
 
 class MonHocKhoiView(AuthenticatedView):
@@ -232,21 +231,19 @@ class MonHocKhoiView(AuthenticatedView):
 
         inputsearch = request.form.get('inputsearch')
 
-        MonHocAlias = aliased(models.MonHoc)
-        KhoiAlias = aliased(models.Khoi)
 
         monhoc_khoi_data = (
             db.session.query(
                 models.MonHoc_Khoi.Id,
                 models.MonHoc_Khoi.MaKhoi,
                 models.MonHoc_Khoi.MaMonHoc,
-                MonHocAlias.MaMonHoc,
-                MonHocAlias.TenMonHoc,
-                KhoiAlias.MaKhoi,
-                KhoiAlias.TenKhoi
+                models.MonHoc.MaMonHoc,
+                models.MonHoc.TenMonHoc,
+                models.Khoi.MaKhoi,
+                models.Khoi.TenKhoi
             )
-            .join(KhoiAlias, KhoiAlias.MaKhoi == models.MonHoc_Khoi.MaKhoi)
-            .join(MonHocAlias, MonHocAlias.MaMonHoc == models.MonHoc_Khoi.MaMonHoc)
+            .join(models.Khoi, models.Khoi.MaKhoi == models.MonHoc_Khoi.MaKhoi)
+            .join(models.MonHoc, models.MonHoc.MaMonHoc == models.MonHoc_Khoi.MaMonHoc)
             .filter(
                 or_(
                     models.MonHoc_Khoi.MaMonHoc.ilike(f"%{inputsearch}%"),
@@ -374,10 +371,12 @@ class ViewQuanLiLop_MonHoc(AuthenticatedView):
 
                 db.session.add(hoc)
                 db.session.commit()
+                return self.load_info_lop(malop=malop, makhoi=makhoi, mahocki=mahocki,
+                                          error = None)
+
         else:
             return self.load_info_lop(malop=malop, makhoi=makhoi, mahocki=mahocki, error = "Khối " + tenkhoi + " không được phép học môn này")
 
-        return redirect(url_for('.index'))
 
 
 
