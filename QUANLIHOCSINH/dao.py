@@ -858,6 +858,9 @@ def GetMaLop(tenkhoi, namtaolop):
     return dslop
 
 
+def GetSoLop(tenkhoi, namtaolop):
+    return models.Lop.query.filter(models.Lop.MaLop.ilike(f"%{tenkhoi}%A%{namtaolop}%")).count()
+
 def CntSiSoLopCurrent(solop, key):
     cntalllopcurrentyear = sum(GetLopByMa(malop=key + str(i) + '_' + CurrentYear()).SiSo for i in range(1, solop + 1))
     return cntalllopcurrentyear
@@ -1068,7 +1071,9 @@ if __name__ == '__main__':
         # solop = ceil(sum_hoc_sinh_not_lop / app.config["MAX_SS_LOP"])
         # # print(solop)
         # Division_Class(solopcanchia= solop)
-        monhoc_khoi_data = (db.session.query(models.MonHoc_Khoi.MaKhoi, models.MonHoc_Khoi.MaMonHoc, models.MonHoc.MaMonHoc, models.MonHoc.TenMonHoc, models.Khoi.MaKhoi, models.Khoi.TenKhoi)
-                            .join(models.Khoi, models.Khoi.MaKhoi == models.MonHoc_Khoi.MaKhoi)
-                            .join(models.MonHoc, models.MonHoc.MaMonHoc == models.MonHoc_Khoi.MaMonHoc).all())
-        print(monhoc_khoi_data)
+        # monhoc_khoi_data = (db.session.query(models.MonHoc_Khoi.MaKhoi, models.MonHoc_Khoi.MaMonHoc, models.MonHoc.MaMonHoc, models.MonHoc.TenMonHoc, models.Khoi.MaKhoi, models.Khoi.TenKhoi)
+        #                     .join(models.Khoi, models.Khoi.MaKhoi == models.MonHoc_Khoi.MaKhoi)
+        #                     .join(models.MonHoc, models.MonHoc.MaMonHoc == models.MonHoc_Khoi.MaMonHoc).all())
+        # print(    monhoc_khoi_data)
+
+        print((GetSoLop(tenkhoi = '11', namtaolop = '2023')))

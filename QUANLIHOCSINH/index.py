@@ -392,7 +392,8 @@ def dieuchinhdanhsachlop():
         lop = '10A' + page
         tenkhoi = "10"
 
-    solop = len(dao.GetMaLop(namtaolop=namtaolop, tenkhoi=tenkhoi))
+    # solop = len(dao.GetMaLop(namtaolop=namtaolop, tenkhoi=tenkhoi))
+    solop= dao.GetSoLop(namtaolop=namtaolop, tenkhoi=tenkhoi)
 
     lophocsinh = dao.LoadLop(malop=malop, key="info")
 
@@ -1062,8 +1063,11 @@ def loadsolop(value):
         value = '10'
     else:
         namtaolop = str(int(dao.CurrentYear()) - 1)
+        print(namtaolop)
+        print(value)
 
-    solop = len(dao.GetMaLop(namtaolop=namtaolop, tenkhoi=value))
+    # solop = len(dao.GetMaLop(namtaolop=namtaolop, tenkhoi=value))
+    solop = dao.GetSoLop(tenkhoi = value , namtaolop = namtaolop)
 
     return jsonify({"solop": solop})
 

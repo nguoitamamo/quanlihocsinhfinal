@@ -410,7 +410,7 @@ class ViewThayDoiQuyDinh(AuthenticatedView):
 
 
 
-class ViewMonHoc(AdminView):
+class ViewMonHoc(AdminView):    
     column_list = ['MaMonHoc', 'TenMonHoc']
 
     column_labels = {
