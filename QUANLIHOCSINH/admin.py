@@ -37,7 +37,7 @@ class ThongbaoView(AdminView):
 from wtforms_sqlalchemy.fields import QuerySelectField
 
 
-class ViewGiangVien(ModelView):
+class ViewGiangVien(AdminView):
     column_list = ['MaGiangVien', 'MaMonHoc', 'Hocs']
 
     column_labels = {
@@ -48,7 +48,7 @@ class ViewGiangVien(ModelView):
     form_columns = ['MaGiangVien', 'Hocs']
 
 
-class ViewMonHocKhoi(ModelView):
+class ViewMonHocKhoi(AdminView):
     column_list = ['MaMonHoc', 'MaKhoi', 'MonHocs', 'Khois']
 
     # Các nhãn cho cột
@@ -380,8 +380,7 @@ class ViewQuanLiLop_MonHoc(AuthenticatedView):
 
 
 
-class ViewThayDoiQuyDinh(BaseView):
-
+class ViewThayDoiQuyDinh(AuthenticatedView):
 
     @expose('/')
     def index(self):
@@ -411,7 +410,7 @@ class ViewThayDoiQuyDinh(BaseView):
 
 
 
-class ViewMonHoc(ModelView):
+class ViewMonHoc(AdminView):
     column_list = ['MaMonHoc', 'TenMonHoc']
 
     column_labels = {
@@ -437,5 +436,5 @@ admin.add_view(LogoutView(name='Đăng xuất'))
 admin.add_view(ViewMonHoc(models.MonHoc, db.session, name="Môn học"))
 admin.add_view(MonHocKhoiView(name='Quản lí môn học của khối'))
 admin.add_view(ViewQuanLiLop_MonHoc(name='Quản lí môn học của lớp'))
-admin.add_view(ViewThayDoiQuyDinh(name='Thay đổi quy định'))
+admin.add_view(ViewThayDoiQuyDinh(name='Thay đổi quy định') )
 
