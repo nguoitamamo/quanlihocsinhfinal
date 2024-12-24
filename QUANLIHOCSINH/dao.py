@@ -530,12 +530,14 @@ def  GetHocSinhByTenHoTenEmailPhone(inputsearch, malop=None, namtaolop=None, ten
 
     phone = GetIDByPhone(inputsearch)
     if phone:
-        res.append({"MaHocSinh": phone.UserID,
-                    "HoTen": GetUserInforByUserID(phone.UserID),
-                    "MaLop": GetLopByMa(mahocsinh=phone.UserID, namtaolop=namtaolop)[0]
-                    })
-
-        return res
+        try:
+            res.append({"MaHocSinh": phone.UserID,
+                        "HoTen": GetUserInforByUserID(phone.UserID),
+                        "MaLop": GetLopByMa(mahocsinh=phone.UserID, namtaolop= namtaolop)[0]
+                        })
+            return res
+        except Exception as ex:
+            return []
 
     if malop:
 
@@ -546,7 +548,6 @@ def  GetHocSinhByTenHoTenEmailPhone(inputsearch, malop=None, namtaolop=None, ten
     else:
         dsmalop = GetMaLop(namtaolop= namtaolop , tenkhoi = tenkhoi)
 
-        # ds = GetIDByHoTenEmail("test103@gmail.com", "L10A1_2024")
         for i in dsmalop:
             for user in GetIDByHoTenEmail(inputsearch=inputsearch, malop=i[0]):
                 res.append({"MaHocSinh": user.UserID,

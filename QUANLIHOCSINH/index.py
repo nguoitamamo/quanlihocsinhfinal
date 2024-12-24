@@ -739,6 +739,7 @@ def nhapdiemlop():
     if request.method == 'POST':
 
         data = request.form.copy()
+        print(data)
 
         malop = data['dslop'] if 'dslop' in data else ''
 
@@ -761,7 +762,7 @@ def nhapdiemlop():
         if data['searchhocsinh']:
 
             if data['keytimkiem'] == '0':
-                hocsinhs = dao.GetHocSinhByTenHoTenEmailPhone(inputsearch=data['searchhocsinh'], malop=malop)
+                hocsinhs = dao.GetHocSinhByTenHoTenEmailPhone(inputsearch=data['searchhocsinh'], malop=malop, namtaolop=namtaolop)
 
                 for hs in hocsinhs:
                     hs_diem = {
@@ -837,6 +838,7 @@ def xuatdiemlop():
     if request.method == 'POST':
 
         data = request.form.copy()
+        print(data)
 
         makhoi = int(data['dskhoi'])
 
@@ -859,14 +861,14 @@ def xuatdiemlop():
             if data['keytimkiem'] == '0':
 
                 listmalop.append(malop)
-                hocsinhs = dao.GetHocSinhByTenHoTenEmailPhone(inputsearch=data['searchhocsinh'], malop=malop)
-
+                hocsinhs = dao.GetHocSinhByTenHoTenEmailPhone(inputsearch=data['searchhocsinh'], malop=malop, namtaolop=namtaolop)
+                print(hocsinhs)
                 listmahocsinh[malop] = [hs['MaHocSinh'] for hs in hocsinhs]
 
             else:
 
                 hocsinhs = dao.GetHocSinhByTenHoTenEmailPhone(inputsearch=data['searchhocsinh'], namtaolop=namtaolop, tenkhoi = tenkhoi)
-                print(hocsinhs)
+
                 for hs in hocsinhs:
                     if hs['MaLop'] not in listmalop:
                         listmalop.append(hs['MaLop'])
@@ -885,7 +887,7 @@ def xuatdiemlop():
                                        keytimkiem=data['keytimkiem'],
                                        dslopcheckbox=lophocinhockis,
                                        dsmomhoc=dao.LoadMonHocOfLop(malop),
-                                       tenmonhoc=dao.GetMonHoc(mamonhoc=data['dsmonhoc']).TenMonHoc,
+                                       tenmonhoc=dao.GetMonHoc(mamonhoc=data['dsmonhoc']).TenMonHoc if data['dsmonhoc'] else None,
                                        dskhoi=dskhoi, makhoi=makhoi,
                                        danh_sach_hoc_ki=dao.load_hoc_ki(), namhoc=data['hocki']
                                        )
