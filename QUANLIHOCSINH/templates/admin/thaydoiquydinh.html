@@ -21,11 +21,11 @@
         </form>
 
         <form action="{{ url_for('.change_age_range') }}" method="POST">
-            <label for="si_so_min">Sĩ số lớp tối thiểu: </label>
-            <input type="number" name="si_so_min" value="{{ si_so_min }}" min="1">
+            <label for="tuoi_min">Độ tuổi tối thiểu: </label>
+            <input type="number" name="tuoi_min" value="{{ tuoi_min }}" min="1">
 
-            <label for="si_so_max">Sĩ số lớp tối đa: </label>
-            <input type="number" name="si_so_max" value="{{ si_so_max }}" min="1">
+            <label for="tuoi_max">Độ tuổi tối đa: </label>
+            <input type="number" name="tuoi_max" value="{{ tuoi_max }}" min="1">
 
             <button type="submit" class = "btn btn-success">Cập nhật</button>
         </form>

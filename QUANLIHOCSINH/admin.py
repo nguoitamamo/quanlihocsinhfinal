@@ -397,15 +397,15 @@ class ViewThayDoiQuyDinh(AuthenticatedView):
             app.config["MAX_SS_LOP"] = max_ss_lop
             return redirect(url_for('.index'))
 
-
+    
 
     @expose('/change_age_range', methods=['POST'])
     def change_age_range(self):
         if request.method == 'POST':
-            si_so_min = int(request.form['si_so_min'])
-            si_so_max = int(request.form['si_so_max'])
-            app.config["SI_SO_MIN"] = si_so_min
-            app.config["SI_SO_MAX"] = si_so_max
+            tuoi_min = int(request.form['tuoi_min'])
+            tuoi_max = int(request.form['tuoi_max'])
+            app.config["SI_SO_MIN"] = tuoi_min
+            app.config["SI_SO_MAX"] = tuoi_max
             return redirect(url_for('.index'))
 
 

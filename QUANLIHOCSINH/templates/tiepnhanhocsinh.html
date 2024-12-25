@@ -61,15 +61,15 @@
     </style>
 {% endblock %}
 
-{% block role %}
-    {% for role in roles %}
-        {% for key in role.keys() %}
-            <li class="nav-item">
-                <a href="{{ url_for(role[key]) }}" class="nav-link active text-dark">{{ key }}</a>
-            </li>
-        {% endfor %}
-    {% endfor %}
-{% endblock %}
+{#{% block role %}#}
+{#    {% for role in roles %}#}
+{#        {% for key in role.keys() %}#}
+{#            <li class="nav-item">#}
+{#                <a href="{{ url_for(role[key]) }}" class="nav-link active text-dark">{{ key }}</a>#}
+{#            </li>#}
+{#        {% endfor %}#}
+{#    {% endfor %}#}
+{#{% endblock %}#}
 
 
 {% block content %}

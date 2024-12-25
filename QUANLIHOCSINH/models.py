@@ -63,7 +63,7 @@ class Token(db.Model):
 class Phone(db.Model):
     __tablename__ = 'phone'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    Number = Column(String(11), nullable=False)
+    Number = Column(String(11), nullable=False, unique=True)
     UserID = Column(String(20), ForeignKey('userinfor.UserID')  , nullable=False)
 
 

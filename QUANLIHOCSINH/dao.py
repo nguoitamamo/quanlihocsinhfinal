@@ -835,7 +835,7 @@ def RemoveDshocsinhAllOfCurrentyear():
 
     lophocsinhcurrent = db.session.query(models.LopHocSinh).filter(models.LopHocSinh.NamTaoLop == currentyear).delete()
 
-    lopcurrent = db.session.query(models.Lop).filter(models.Lop.MaLop.ilike(f"%{currentyear}%")).delete()
+    lopcurrent = db.session.query(models.Lop).filter(models.Lop.MaLop.ilike(f"%_{currentyear}%")).delete()
 
     db.session.commit()
     return True
