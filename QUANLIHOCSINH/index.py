@@ -564,6 +564,8 @@ def sendpassforgotpassword():
 
                 dao.AddToken(Pass_Confirm_Email, email)
 
+                utils.Send_Email(subject="Mã xác nhận", content=Pass_Confirm_Email, email_rec=email)
+
                 return render_template('signin.html', state="sent", email=email)
 
             else:
