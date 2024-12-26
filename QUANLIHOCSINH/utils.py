@@ -55,7 +55,7 @@ info = {
 
 def Send_Email(subject, content, email_rec):
     email = "2251052130truong@ou.edu.vn"
-    passw = "18072004@Hnt"
+    passw = ""
     email_send = email_rec
     mail_content = content
 
